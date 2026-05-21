@@ -536,6 +536,71 @@ app.put('/api/email/config', auth, (req, res) => {
 });
 
 
+// ════════════════════════════════════════════════════════════════
+// MAINTENANCE LOG API
+// ════════════════════════════════════════════════════════════════
+app.get('/api/maintenance', auth, (req, res) => {
+  if(!db.maintenanceLogs) db.maintenanceLogs = [];
+  let logs = db.maintenanceLogs;
+  if(req.query.locoId) logs = logs.filter(l => l.locoId === req.query.locoId);
+  if(req.query.tm) logs = logs.filter(l => l.tm === req.query.tm);
+  res.json(logs.slice(0, parseInt(req.query.limit) || 200));
+});
+
+app.post('/api/maintenance', auth, (req, res) => {
+  if(!db.maintenanceLogs) db.maintenanceLogs = [];
+  const entry = {
+    id: 'maint_' + Date.now() + '_' + Math.random().toString(36).slice(2,6),
+    locoId: req.body.locoId,
+    locoNumber: req.body.locoNumber || '',
+    tm: req.body.tm,
+    type: req.body.type,
+    description: req.body.description,
+    doneBy: req.body.doneBy || req.user.name || req.user.username,
+    date: req.body.date || new Date().toISOString().split('T')[0],
+    nextDue: req.body.nextDue || '',
+    status: req.body.status || 'completed',
+    createdBy: req.user.username,
+    createdAt: new Date().toISOString()
+  };
+  if(!entry.locoId || !entry.tm || !entry.description)
+    return res.status(400).json({ error: 'locoId, tm, description required' });
+  db.maintenanceLogs.unshift(entry);
+  if(db.maintenanceLogs.length > 5000) db.maintenanceLogs = db.maintenanceLogs.slice(0,5000);
+  saveDB();
+  res.json(entry);
+});
+
+app.put('/api/maintenance/:id', auth, (req, res) => {
+  if(!db.maintenanceLogs) db.maintenanceLogs = [];
+  const idx = db.maintenanceLogs.findIndex(l => l.id === req.params.id);
+  if(idx < 0) return res.status(404).json({ error: 'Not found' });
+  Object.assign(db.maintenanceLogs[idx], req.body, { id: req.params.id });
+  saveDB();
+  res.json(db.maintenanceLogs[idx]);
+});
+
+app.delete('/api/maintenance/:id', auth, (req, res) => {
+  if(!db.maintenanceLogs) db.maintenanceLogs = [];
+  db.maintenanceLogs = db.maintenanceLogs.filter(l => l.id !== req.params.id);
+  saveDB();
+  res.json({ success: true });
+});
+
+// Maintenance CSV export
+app.get('/api/maintenance/export', auth, (req, res) => {
+  const csvHeader = 'Date,Loco,TM,Type,Description,Done By,Next Due,Status\n';
+  if(!db.maintenanceLogs) return res.send(csvHeader);
+  let csv = csvHeader;
+  db.maintenanceLogs.forEach(l => {
+    csv += `${l.date},${l.locoNumber||l.locoId},${l.tm},"${l.type}","${(l.description||'').replace(/"/g,"'")}",${l.doneBy},${l.nextDue||''},${l.status}
+`;
+  });
+  res.setHeader('Content-Type', 'text/csv');
+  res.setHeader('Content-Disposition', `attachment; filename="maintenance_log_${new Date().toISOString().slice(0,10)}.csv"`);
+  res.send(csv);
+});
+
 // Loco photo upload (base64)
 app.put('/api/locos/:id/photo', auth, (req, res) => {
   if (req.user.role !== 'admin') return res.status(403).json({ error: 'Admin only' });

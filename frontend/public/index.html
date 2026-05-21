@@ -489,14 +489,17 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--f
       <div class="page" id="page-maintenance">
         <div class="page-header">
           <div><div class="page-title">Maintenance <span>Log</span></div><div class="page-sub">Track maintenance history for each traction motor</div></div>
-          <button class="btn btn-primary" onclick="openMaintModal()">+ Add Entry</button>
+          <div class="page-actions">
+            <button class="btn btn-success btn-sm" onclick="exportMaintenanceCSV()">⬇ Export CSV</button>
+            <button class="btn btn-primary" onclick="openMaintModal()">+ Add Entry</button>
+          </div>
         </div>
         <div class="loco-sel" id="maintLocoSel"></div>
         <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;" id="maintTmSel"></div>
         <div class="card" style="padding:0;overflow:hidden;">
           <div style="overflow-x:auto;">
             <table class="data-table">
-              <thead><tr><th>Date</th><th>TM</th><th>Type</th><th>Description</th><th>Done By</th><th>Next Due</th><th>Status</th></tr></thead>
+              <thead><tr><th>Date</th><th>TM</th><th>Type</th><th>Description</th><th>Done By</th><th>Next Due</th><th>Status</th><th>Del</th></tr></thead>
               <tbody id="maintTableBody"><tr><td colspan="7" style="text-align:center;color:var(--text3);padding:30px;">No maintenance records. Add first entry.</td></tr></tbody>
             </table>
           </div>
@@ -1847,7 +1850,7 @@ function drawSparkline(canvasId, data, color) {
 // ════════════════════════════════════════════════════════════════
 // FEATURE 6: MAINTENANCE LOG
 // ════════════════════════════════════════════════════════════════
-let maintenanceLogs = JSON.parse(localStorage.getItem('tm_maintenance') || '[]');
+// Maintenance logs loaded from server
 
 function openMaintModal() {
   document.getElementById('maint_date').value = new Date().toISOString().split('T')[0];
@@ -1856,11 +1859,11 @@ function openMaintModal() {
   document.getElementById('maintModal').classList.add('show');
 }
 
-function saveMaintEntry() {
+async function saveMaintEntry() {
+  const loco = locos.find(l=>l.id===selectedLocoId);
   const entry = {
-    id: 'maint_' + Date.now(),
-    locoId: selectedLocoId,
-    locoNumber: locos.find(l=>l.id===selectedLocoId)?.locoNumber || '--',
+    locoId: selectedLocoId || '',
+    locoNumber: loco?.locoNumber || '--',
     tm: document.getElementById('maint_tm').value,
     type: document.getElementById('maint_type').value,
     description: document.getElementById('maint_desc').value,
@@ -1868,67 +1871,112 @@ function saveMaintEntry() {
     date: document.getElementById('maint_date').value,
     nextDue: document.getElementById('maint_next').value,
     status: document.getElementById('maint_status').value,
-    createdAt: new Date().toISOString()
   };
   if(!entry.description) { showToast('Enter description', 'error'); return; }
-  maintenanceLogs.unshift(entry);
-  localStorage.setItem('tm_maintenance', JSON.stringify(maintenanceLogs));
-  closeModal('maintModal');
+  if(!entry.locoId) { showToast('Select a locomotive first', 'error'); return; }
+  const r = await api('/api/maintenance', { method:'POST', body: JSON.stringify(entry) });
+  if(!r) { showToast('Connection error', 'error'); return; }
+  if(r.ok) {
+    closeModal('maintModal');
+    await loadMaintLogs();
+    showToast('✅ Maintenance entry saved online!', 'success');
+  } else {
+    const d = await r.json();
+    showToast('Error: ' + (d.error || 'Failed'), 'error');
+  }
+}
+
+let maintenanceLogs = [];
+
+async function loadMaintLogs() {
+  const locoFilter = selectedLocoId ? `?locoId=${selectedLocoId}` : '';
+  const r = await api('/api/maintenance' + locoFilter);
+  if(!r) return;
+  maintenanceLogs = await r.json();
   renderMaintTable();
-  showToast('Maintenance entry saved!', 'success');
 }
 
 function renderMaintTable() {
   const tbody = document.getElementById('maintTableBody'); if(!tbody) return;
-  const locoLogs = maintenanceLogs.filter(l => !selectedLocoId || l.locoId === selectedLocoId);
-  if(!locoLogs.length) {
-    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--text3);padding:30px;">No maintenance records for this locomotive.</td></tr>';
+  if(!maintenanceLogs.length) {
+    tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:var(--text3);padding:30px;"><div style="font-size:24px;margin-bottom:8px;">🔧</div>No maintenance records yet. Add first entry!</td></tr>';
     return;
   }
-  tbody.innerHTML = locoLogs.map(l => {
-    const sc = l.status === 'completed' ? 'var(--green)' : l.status === 'pending' ? 'var(--red)' : '#D69E2E';
+  tbody.innerHTML = maintenanceLogs.map(l => {
+    const sc = l.status === 'completed' ? '#276749' : l.status === 'pending' ? '#9B2C2C' : '#D69E2E';
     const overdue = l.nextDue && new Date(l.nextDue) < new Date() && l.status !== 'completed';
     return `<tr${overdue?' style="background:#FFF5F5"':''}>
       <td style="font-family:monospace;font-size:12px">${l.date || '--'}</td>
       <td><span style="background:var(--blue-lt);color:var(--blue);padding:2px 8px;border-radius:8px;font-size:11px;font-weight:700">${l.tm}</span></td>
       <td style="font-size:13px">${l.type}</td>
-      <td style="font-size:12px;color:var(--text2)">${l.description}</td>
+      <td style="font-size:12px;color:var(--text2);max-width:200px">${l.description}</td>
       <td style="font-size:12px">${l.doneBy || '--'}</td>
-      <td style="font-size:12px;color:${overdue?'var(--red)':'inherit'}${overdue?';font-weight:700':''}">
-        ${l.nextDue || '--'}${overdue?' ⚠️ OVERDUE':''}
+      <td style="font-size:12px;color:${overdue?'#9B2C2C':'inherit'}${overdue?';font-weight:700':''}">
+        ${l.nextDue || '--'}${overdue?' ⚠️':''}
       </td>
       <td><span style="background:${sc};color:white;padding:2px 8px;border-radius:8px;font-size:11px;font-weight:700;text-transform:uppercase">${l.status}</span></td>
+      <td>
+        <button class="btn btn-danger btn-sm" onclick="deleteMaintEntry('${l.id}')">✕</button>
+      </td>
     </tr>`;
   }).join('');
 }
 
+async function deleteMaintEntry(id) {
+  const r = await api('/api/maintenance/'+id, {method:'DELETE'});
+  if(r?.ok) { await loadMaintLogs(); showToast('Deleted', 'success'); }
+}
+
+async function exportMaintenanceCSV() {
+  window.open(API + '/api/maintenance/export?_auth=' + token, '_blank');
+  showToast('Maintenance CSV downloading!', 'success');
+}
+
 function loadMaintPage() {
-  // Populate loco selector for maintenance
   const sel = document.getElementById('maintLocoSel');
   if(sel) {
     sel.innerHTML = [
-      `<div class="loco-chip ${!selectedLocoId?'active':''}" onclick="selectedLocoId=null;renderMaintTable()">All</div>`,
-      ...locos.map(l => `<div class="loco-chip ${selectedLocoId===l.id?'active':''}" onclick="selectedLocoId='${l.id}';renderMaintTable()">${l.locoNumber}</div>`)
+      `<div class="loco-chip ${!selectedLocoId?'active':''}" onclick="document.querySelectorAll('#maintLocoSel .loco-chip').forEach(e=>e.classList.remove('active'));this.classList.add('active');selectedLocoId=null;loadMaintLogs()">All</div>`,
+      ...locos.map(l => `<div class="loco-chip ${selectedLocoId===l.id?'active':''}" onclick="document.querySelectorAll('#maintLocoSel .loco-chip').forEach(e=>e.classList.remove('active'));this.classList.add('active');selectedLocoId='${l.id}';loadMaintLogs()">${l.locoNumber}</div>`)
     ].join('');
   }
-  renderMaintTable();
+  loadMaintLogs();
 }
 
 // ════════════════════════════════════════════════════════════════
-// FEATURE 7: SCHEDULED CSV EXPORT (daily)
+// FEATURE 7: SCHEDULED CSV AUTO-DOWNLOAD (every 24 hours)
 // ════════════════════════════════════════════════════════════════
 function checkScheduledExport() {
-  const lastExport = localStorage.getItem('tm_last_export');
+  if(!token || !locos.length) return;
+  const lastExport = localStorage.getItem('tm_last_export_date');
   const today = new Date().toDateString();
-  if(lastExport !== today && liveLogRows.length > 100) {
-    exportLiveCSV();
-    localStorage.setItem('tm_last_export', today);
-    showToast('Daily CSV auto-exported!', 'success');
-  }
+  if(lastExport === today) return; // Already exported today
+  
+  // Only auto-export if we have significant data
+  const loco = locos[0];
+  if(!loco) return;
+  
+  // Download CSV report for all locos
+  const from = new Date(Date.now() - 86400000).toISOString();
+  const to = new Date().toISOString();
+  locos.forEach(l => {
+    const url = `${API}/api/report/${l.id}?format=csv&from=${from}&to=${to}&_auth=${token}`;
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `LOCO_${l.locoNumber}_${new Date().toISOString().slice(0,10)}.csv`;
+    a.style.display = 'none';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+  });
+  
+  localStorage.setItem('tm_last_export_date', today);
+  showToast('📥 Daily CSV auto-downloaded!', 'success');
 }
 
-// Run export check every hour
-setInterval(checkScheduledExport, 3600000);
+// Check at startup and every hour
+setTimeout(checkScheduledExport, 30000); // 30s after login
+setInterval(checkScheduledExport, 3600000); // Every hour check
 
 // Alarm sound check called from loadAlarms
 
