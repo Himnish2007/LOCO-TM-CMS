@@ -220,7 +220,8 @@ app.post('/api/data/ingest', (req, res) => {
     if (!db.sensorReadings[loco.id][tm])
       db.sensorReadings[loco.id][tm] = { latest: null, history: [] };
     const d = tmData[tm];
-    // If sensor disconnected (isValid:false from BNI), store as disconnected
+    // DISCONNECTED comes from Lua script (isValid:false from BNI)
+    // Only trust DISCONNECTED if explicitly set by Lua script
     if (d.ioLinkStatus === 'DISCONNECTED') {
       db.sensorReadings[loco.id][tm].latest = { 
         ioLinkStatus: 'DISCONNECTED', timestamp: ts,
@@ -228,6 +229,8 @@ app.post('/api/data/ingest', (req, res) => {
       };
       return; // skip history + alarm for disconnected
     }
+    // Do NOT auto-detect disconnection from temp/vib values
+    // This was causing flickering on dashboard
     const r = { ...d, timestamp: ts };
     db.sensorReadings[loco.id][tm].latest = r;
     // Only store valid readings in history

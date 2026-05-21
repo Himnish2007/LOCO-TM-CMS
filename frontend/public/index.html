@@ -721,13 +721,12 @@ function updateTmGrid() {
     const tm = `TM${i+1}`;
     const d = ld[tm];
 
-    // Sensor connected = ioLinkStatus OK + realistic data
-    // DISCONNECTED = isValid:false from BNI (sent by v13 lua script)
+    // Sensor connected = ioLinkStatus OK (primary check from BNI isValid)
+    // Temp > 0.5 only as secondary sanity check to avoid flicker near threshold
     const hasData = d != null;
     const sensorConnected = hasData && 
       d.ioLinkStatus === 'OK' &&
-      d.vib != null &&
-      d.temp != null && d.temp > 1.0;
+      d.vib != null;  // Don't use temp threshold - causes flickering!
 
     if (!hasData || !sensorConnected) {
       return `<div class="tmc ${selectedTmKey===tm?'selected':''}" onclick="selectTm('${tm}')">
@@ -845,9 +844,13 @@ function refreshOverview() {
   const grid = document.getElementById('overviewLocoGrid'); if (!grid) return;
   grid.innerHTML = locos.map(l => {
     const ld = latestData[l.id]||{};
-    const tms = Object.entries(ld).slice(0,6).map(([tm,d]) => {
-      const tc = d.temp>=(config.tempThresholds?.critical||85)?'val-crit':d.temp>=(config.tempThresholds?.warning||70)?'val-warn':'val-good';
-      const vc = d.vib?.rms>=(config.vibThresholds?.critical?.rms||8)?'val-crit':d.vib?.rms>=(config.vibThresholds?.warning?.rms||5)?'val-warn':'val-good';
+    const loco_tmCount = l.tmCount || 6;
+    const tmKeys = Array.from({length:loco_tmCount}, (_,i) => 'TM'+(i+1));
+    const tms = tmKeys.map(tm => {
+      const d = ld[tm] || null;
+      if(!d || d.ioLinkStatus==='DISCONNECTED') return `<div class="ov-tm"><div class="ov-tm-key" style="color:var(--text3)">${tm}</div><div class="ov-tm-temp" style="color:var(--text4);font-size:11px">--</div><div class="ov-tm-vib" style="color:var(--text4)">NC</div></div>`;
+      const tc = d.temp>=(config?.tempThresholds?.critical||85)?'val-crit':d.temp>=(config?.tempThresholds?.warning||70)?'val-warn':'val-good';
+      const vc = d.vib?.rms>=(config?.vibThresholds?.critical?.rms||8)?'val-crit':d.vib?.rms>=(config?.vibThresholds?.warning?.rms||5)?'val-warn':'val-good';
       return `<div class="ov-tm"><div class="ov-tm-key">${tm}</div><div class="ov-tm-temp ${tc}">${d.temp!=null?d.temp.toFixed(1)+'°':'--'}</div><div class="ov-tm-vib ${vc}">${d.vib?.rms!=null?d.vib.rms.toFixed(3):'--'}</div></div>`;
     }).join('');
     const health = calcLocoHealth(l.id);
