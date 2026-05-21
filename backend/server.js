@@ -699,7 +699,13 @@ async function sendReport(type = 'scheduled', toEmail = EMAIL_TO) {
   <div style="background:#1A365D;color:#AECEF0;padding:14px 28px;font-size:10px;text-align:center">Confidential | Himnish Limited | LOCO TM CMS</div>
 </div></body></html>`;
 
-  const transporter = nodemailer.createTransport({ service: 'gmail', auth: { user: EMAIL_USER, pass: EMAIL_PASS } });
+  const transporter = nodemailer.createTransport({
+  host: 'smtp.gmail.com',
+  port: 587,
+  secure: false,
+  auth: { user: EMAIL_USER, pass: EMAIL_PASS },
+  tls: { rejectUnauthorized: false }
+});
   const recipients = db.emailConfig?.recipients || toEmail;
   await transporter.sendMail({
     from: `"LOCO TM CMS" <${EMAIL_USER}>`,
