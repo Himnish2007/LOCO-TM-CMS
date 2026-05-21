@@ -370,7 +370,6 @@ app.get('/api/report/:locoId', auth, (req, res) => {
 // PDF REPORT GENERATION
 // ════════════════════════════════════════════════════════════════
 app.get('/api/report/:locoId/pdf', auth, (req, res) => {
-  const db = loadDB();
   const loco = db.locos.find(l => l.id === req.params.locoId);
   if (!loco) return res.status(404).json({ error: 'Loco not found' });
   const readings = db.sensorReadings[loco.id] || {};
@@ -467,7 +466,6 @@ app.get('/api/report/:locoId/pdf', auth, (req, res) => {
 
 // Get all depots
 app.get('/api/depots', auth, (req, res) => {
-  const db = loadDB();
   const depotMap = {};
   db.locos.forEach(l => {
     const depot = l.depot || 'Unassigned';
@@ -482,11 +480,10 @@ app.get('/api/depots', auth, (req, res) => {
 // Update loco depot
 app.put('/api/locos/:id/depot', auth, (req, res) => {
   if (req.user.role !== 'admin') return res.status(403).json({ error: 'Admin only' });
-  const db = loadDB();
   const loco = db.locos.find(l => l.id === req.params.id);
   if (!loco) return res.status(404).json({ error: 'Not found' });
   loco.depot = req.body.depot;
-  saveDB(db);
+  saveDB();
   res.json(loco);
 });
 
@@ -521,11 +518,10 @@ app.get('/api/email/config', auth, (req, res) => {
 // Save email recipients
 app.put('/api/email/config', auth, (req, res) => {
   if (req.user.role !== 'admin') return res.status(403).json({ error: 'Admin only' });
-  const db = loadDB();
   db.emailConfig = db.emailConfig || {};
   db.emailConfig.recipients = req.body.recipients || EMAIL_TO;
   db.emailConfig.schedule = req.body.schedule || '0 8 * * *';
-  saveDB(db);
+  saveDB();
   res.json({ success: true });
 });
 
@@ -656,7 +652,6 @@ if (process.env.DEMO_MODE === 'true') {
 async function sendReport(type = 'scheduled', toEmail = EMAIL_TO) {
   if (!nodemailer) throw new Error('nodemailer not installed');
   if (!EMAIL_USER || !EMAIL_PASS) throw new Error('Email not configured');
-  const db = loadDB();
   const ts = new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' });
 
   let locoSummary = '';
