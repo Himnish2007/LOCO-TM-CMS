@@ -536,6 +536,18 @@ app.put('/api/email/config', auth, (req, res) => {
 });
 
 
+// Loco photo upload (base64)
+app.put('/api/locos/:id/photo', auth, (req, res) => {
+  if (req.user.role !== 'admin') return res.status(403).json({ error: 'Admin only' });
+  const loco = db.locos.find(l => l.id === req.params.id);
+  if (!loco) return res.status(404).json({ error: 'Not found' });
+  if (!req.body.photo) return res.status(400).json({ error: 'No photo data' });
+  // Store base64 photo (max 500KB)
+  if (req.body.photo.length > 700000) return res.status(400).json({ error: 'Photo too large (max 500KB)' });
+  loco.photo = req.body.photo;
+  saveDB(); res.json({ success: true });
+});
+
 app.get('/health', (req, res) =>
   res.json({ status: 'ok', uptime: Math.round(process.uptime()), locos: db.locos.length }));
 

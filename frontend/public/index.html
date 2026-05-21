@@ -24,6 +24,31 @@
   --radius:8px;--radius2:12px;
   --font:'Inter',sans-serif;--mono:'JetBrains Mono',monospace;
 }
+/* ── DARK MODE ─────────────────────────────────────────────────── */
+[data-theme="dark"]{
+  --bg:#0D1117;--bg2:#161B22;--bg3:#1C2128;--card:#161B22;
+  --border:#30363D;--border2:#484F58;
+  --blue-lt:#1C2A3A;--green-lt:#0D2818;--red-lt:#2D1515;--yellow-lt:#2D2010;
+  --green-bg:#144D25;--red-bg:#4A1515;--yellow-bg:#3D2B0A;
+  --text:#E6EDF3;--text2:#C9D1D9;--text3:#8B949E;--text4:#484F58;
+  --white:#161B22;
+  --shadow:0 1px 3px rgba(0,0,0,0.4);
+  --shadow2:0 4px 6px rgba(0,0,0,0.5);
+  --shadow3:0 10px 15px rgba(0,0,0,0.6);
+}
+[data-theme="dark"] .sidebar{background:#161B22 !important;}
+[data-theme="dark"] .topbar{background:#010409 !important;}
+[data-theme="dark"] .data-table th{background:#010409 !important;}
+[data-theme="dark"] .modal-header{background:#010409 !important;}
+[data-theme="dark"] .f-input,[data-theme="dark"] .f-select{background:#0D1117 !important;color:#E6EDF3;border-color:#30363D;}
+[data-theme="dark"] .login-box{background:#161B22 !important;}
+[data-theme="dark"] .login-header{background:linear-gradient(135deg,#010409,#161B22) !important;}
+[data-theme="dark"] .nav-item:hover{background:#1C2128 !important;}
+[data-theme="dark"] .nav-item.active{background:#1C2A3A !important;}
+[data-theme="dark"] .tmc,[data-theme="dark"] .card,[data-theme="dark"] .stat-box{background:#161B22 !important;border-color:#30363D !important;}
+[data-theme="dark"] .tm-m,[data-theme="dark"] .axis-box,[data-theme="dark"] .ov-tm{background:#0D1117 !important;border-color:#30363D !important;}
+[data-theme="dark"] .data-table tr:hover td{background:#1C2128 !important;}
+[data-theme="dark"] .data-table td{border-color:#30363D !important;}
 html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--font);font-size:14px;overflow-x:hidden;}
 ::-webkit-scrollbar{width:5px;height:5px;}
 ::-webkit-scrollbar-track{background:var(--bg);}
@@ -268,6 +293,12 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--f
 #toast.show{opacity:1;transform:translateY(0);}
 #toast.success{background:#276749;}
 #toast.error{background:#9B2C2C;}
+/* Health score badge */
+.health-score-badge{display:inline-flex;align-items:center;gap:6px;padding:4px 12px;border-radius:20px;font-size:12px;font-weight:700;}
+/* Sparkline */
+.sparkline-wrap{height:35px;margin:6px 0;}
+/* Loco photo */
+.loco-photo{width:48px;height:48px;border-radius:8px;object-fit:cover;border:2px solid var(--border);}
 
 /* RESPONSIVE */
 @media(max-width:1200px){.tm-grid{grid-template-columns:repeat(2,1fr);}.stat-row{grid-template-columns:repeat(3,1fr);}.detail-grid{grid-template-columns:1fr;}}
@@ -303,8 +334,15 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--f
     <div class="tb-logo">TM</div>
     <div><div class="tb-title">LOCO TM CONDITION MONITORING SYSTEM</div><div class="tb-sub">Himnish Limited &middot; Traction Motor Predictive Analytics</div></div>
     <div class="tb-live"><div class="tb-dot offline" id="wsDot"></div><span class="tb-live-txt" id="wsLabel">CONNECTING</span></div>
+    <select id="refreshInterval" onchange="setRefreshInterval(this.value)" style="background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);color:white;font-size:11px;padding:3px 6px;border-radius:6px;font-family:var(--font);" title="Auto-refresh interval">
+      <option value="2000">2s</option>
+      <option value="5000" selected>5s</option>
+      <option value="10000">10s</option>
+      <option value="30000">30s</option>
+    </select>
     <div class="tb-clock" id="clock">--:--:--</div>
     <div class="tb-user"><div class="tb-avatar" id="userAvatar">A</div><div><div class="tb-uname" id="userName">--</div><div class="tb-urole" id="userRole">--</div></div></div>
+    <button class="tb-logout" id="themeBtn" onclick="toggleTheme()" style="margin-right:6px;padding:6px 10px;" title="Toggle Dark/Light Mode">🌙</button>
     <button class="tb-logout" onclick="logout()">Logout</button>
   </div>
   <div style="background:#1e3a5f;border-bottom:1px solid rgba(255,255,255,0.1);padding:4px 20px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;font-size:11px;color:rgba(255,255,255,0.7);">
@@ -334,6 +372,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--f
       <div class="nav-section">Reports</div>
       <div class="nav-item" onclick="showPage('reports')"><span class="nav-icon">&#128202;</span> Generate Report</div>
       <div class="nav-item" onclick="showPage('fleet')"><span class="nav-icon">&#128642;</span> Fleet Overview</div>
+      <div class="nav-item" onclick="showPage('maintenance')"><span class="nav-icon">&#128295;</span> Maintenance Log</div>
       <div class="nav-item admin-only" onclick="showPage('email')"><span class="nav-icon">&#128231;</span> Email Reports</div>
     </div>
     <div class="content" id="mainContent">
@@ -447,6 +486,23 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--f
         </div>
       </div>
 
+      <div class="page" id="page-maintenance">
+        <div class="page-header">
+          <div><div class="page-title">Maintenance <span>Log</span></div><div class="page-sub">Track maintenance history for each traction motor</div></div>
+          <button class="btn btn-primary" onclick="openMaintModal()">+ Add Entry</button>
+        </div>
+        <div class="loco-sel" id="maintLocoSel"></div>
+        <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;" id="maintTmSel"></div>
+        <div class="card" style="padding:0;overflow:hidden;">
+          <div style="overflow-x:auto;">
+            <table class="data-table">
+              <thead><tr><th>Date</th><th>TM</th><th>Type</th><th>Description</th><th>Done By</th><th>Next Due</th><th>Status</th></tr></thead>
+              <tbody id="maintTableBody"><tr><td colspan="7" style="text-align:center;color:var(--text3);padding:30px;">No maintenance records. Add first entry.</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
       <div class="page" id="page-fleet">
         <div class="page-header">
           <div><div class="page-title">Fleet <span>Overview</span></div><div class="page-sub">Depot-wise locomotive health summary</div></div>
@@ -527,6 +583,14 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--f
       <div class="form-row"><div class="f-group"><label class="f-label">Loco Number *</label><input class="f-input" id="loco_number" placeholder="e.g. 22001"></div><div class="f-group"><label class="f-label">Name</label><input class="f-input" id="loco_name" placeholder="WAP-7 Rajdhani Link"></div></div>
       <div class="form-row"><div class="f-group"><label class="f-label">IP Address *</label><input class="f-input" id="loco_ip" placeholder="192.168.x.x"></div><div class="f-group"><label class="f-label">Depot</label><input class="f-input" id="loco_depot" placeholder="LKO Depot"></div></div>
       <div class="form-row"><div class="f-group"><label class="f-label">Series</label><select class="f-select" id="loco_series"><option>WAP-7</option><option>WAP-5</option><option>WAG-9</option><option>WAG-12</option><option>WAM-4</option><option>Other</option></select></div><div class="f-group"><label class="f-label">TM Count</label><select class="f-select" id="loco_tmCount"><option value="6" selected>6 (Standard)</option><option value="4">4</option><option value="3">3</option></select></div></div>
+      <div class="f-group"><label class="f-label">Loco Photo (optional)</label>
+        <div style="display:flex;align-items:center;gap:10px;">
+          <img id="loco_photo_preview" src="" style="width:60px;height:60px;border-radius:8px;object-fit:cover;border:2px solid var(--border);display:none;">
+          <input type="file" id="loco_photo_input" accept="image/*" onchange="previewLocoPhoto(this)" style="display:none;">
+          <button type="button" class="btn btn-ghost btn-sm" onclick="document.getElementById('loco_photo_input').click()">📷 Upload Photo</button>
+          <span style="font-size:11px;color:var(--text3)">JPG/PNG, max 500KB</span>
+        </div>
+      </div>
     </div>
     <div class="modal-footer"><button class="btn btn-ghost" onclick="closeModal('locoModal')">Cancel</button><button class="btn btn-primary" onclick="saveLoco()">Save Locomotive</button></div>
   </div>
@@ -543,6 +607,46 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--f
       <div class="f-group"><label class="f-label">Assign Locomotives</label><div class="loco-check-list" id="locoCheckList"></div></div>
     </div>
     <div class="modal-footer"><button class="btn btn-ghost" onclick="closeModal('userModal')">Cancel</button><button class="btn btn-primary" onclick="saveUser()">Save User</button></div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="maintModal">
+  <div class="modal">
+    <div class="modal-header"><div class="modal-title">Add Maintenance Entry</div><button class="modal-close" onclick="closeModal('maintModal')">&#x2715;</button></div>
+    <div class="modal-body">
+      <div class="form-row">
+        <div class="f-group"><label class="f-label">Traction Motor</label>
+          <select class="f-select" id="maint_tm">
+            <option>TM1</option><option>TM2</option><option>TM3</option>
+            <option>TM4</option><option>TM5</option><option>TM6</option>
+          </select>
+        </div>
+        <div class="f-group"><label class="f-label">Maintenance Type</label>
+          <select class="f-select" id="maint_type">
+            <option>Routine Inspection</option><option>Bearing Replacement</option>
+            <option>Vibration Check</option><option>Temperature Check</option>
+            <option>Brush Replacement</option><option>Insulation Check</option>
+            <option>Oil/Grease Change</option><option>Emergency Repair</option><option>Other</option>
+          </select>
+        </div>
+      </div>
+      <div class="f-group"><label class="f-label">Description</label><textarea class="f-input" id="maint_desc" rows="3" placeholder="Describe the maintenance work done..." style="resize:vertical;"></textarea></div>
+      <div class="form-row">
+        <div class="f-group"><label class="f-label">Done By</label><input class="f-input" id="maint_by" placeholder="Technician name"></div>
+        <div class="f-group"><label class="f-label">Date</label><input type="date" class="f-input" id="maint_date"></div>
+      </div>
+      <div class="form-row">
+        <div class="f-group"><label class="f-label">Next Due Date</label><input type="date" class="f-input" id="maint_next"></div>
+        <div class="f-group"><label class="f-label">Status</label>
+          <select class="f-select" id="maint_status">
+            <option value="completed">Completed</option>
+            <option value="pending">Pending</option>
+            <option value="scheduled">Scheduled</option>
+          </select>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer"><button class="btn btn-ghost" onclick="closeModal('maintModal')">Cancel</button><button class="btn btn-primary" onclick="saveMaintEntry()">Save Entry</button></div>
   </div>
 </div>
 
@@ -670,6 +774,7 @@ function updateTmGrid() {
       </div>
       <div class="health-track"><div class="health-fill" style="width:${health}%;background:${hColor}"></div></div>
       <div class="health-row"><span class="health-label">Health</span><span class="health-val" style="color:${hColor}">${health}%</span></div>
+      <canvas id="spark_${tm}" width="192" height="30" style="width:100%;height:30px;margin-top:4px;opacity:0.8;"></canvas>
     </div>`;
   }).join('');
   // Detail panel
@@ -734,11 +839,23 @@ function refreshOverview() {
       const vc = d.vib?.rms>=(config.vibThresholds?.critical?.rms||8)?'val-crit':d.vib?.rms>=(config.vibThresholds?.warning?.rms||5)?'val-warn':'val-good';
       return `<div class="ov-tm"><div class="ov-tm-key">${tm}</div><div class="ov-tm-temp ${tc}">${d.temp!=null?d.temp.toFixed(1)+'°':'--'}</div><div class="ov-tm-vib ${vc}">${d.vib?.rms!=null?d.vib.rms.toFixed(3):'--'}</div></div>`;
     }).join('');
+    const health = calcLocoHealth(l.id);
+    const hColor = getHealthColor(health);
+    const hLabel = getHealthLabel(health);
     return `<div class="ov-card" onclick="selectLoco('${l.id}','dash');showPage('dashboard')">
       <div class="ov-card-header">
-        <div><div class="ov-loco-num">${l.locoNumber} <span style="font-size:13px;color:var(--text3);font-weight:500">${l.series||''}</span></div><div class="ov-loco-name">${l.name||''} · ${l.depot||''}</div></div>
+        <div style="display:flex;align-items:center;gap:10px;">
+          ${l.photo?`<img src="${l.photo}" style="width:44px;height:44px;border-radius:8px;object-fit:cover;border:2px solid var(--border);">`:'<div style="width:44px;height:44px;background:var(--blue-lt);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:22px;">🚂</div>'}
+          <div><div class="ov-loco-num">${l.locoNumber} <span style="font-size:13px;color:var(--text3);font-weight:500">${l.series||''}</span></div><div class="ov-loco-name">${l.name||''} · ${l.depot||''}</div></div>
+        </div>
         <span class="status-badge ${l.status==='online'?'status-online':'status-offline'}"><span class="status-dot"></span>${(l.status||'offline').toUpperCase()}</span>
       </div>
+      ${health!==null ? `<div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
+        <div style="flex:1;height:6px;background:var(--border);border-radius:3px;overflow:hidden;">
+          <div style="height:100%;width:${health}%;background:${hColor};border-radius:3px;transition:width 0.5s;"></div>
+        </div>
+        <span style="font-size:12px;font-weight:700;color:${hColor}">Health: ${health}% (${hLabel})</span>
+      </div>` : ''}
       <div class="ov-tm-grid">${tms||'<div style="color:var(--text3);font-size:12px;grid-column:1/-1;text-align:center;padding:10px;">No data yet</div>'}</div>
       <div style="font-size:11px;color:var(--text4);margin-top:10px;font-family:monospace">${l.ipAddress} · Last: ${l.lastSeen?new Date(l.lastSeen).toLocaleTimeString():'never'}</div>
     </div>`;
@@ -763,7 +880,11 @@ function renderLocoTable() {
   tbody.innerHTML = locos.map(l=>`
     <tr>
       <td><span class="status-badge ${l.status==='online'?'status-online':'status-offline'}"><span class="status-dot"></span>${(l.status||'offline').toUpperCase()}</span></td>
-      <td style="font-family:monospace;font-weight:700;color:var(--blue)">${(l.locoNumber||'--').toString().replace(/[<>]/g,'')}</td>
+      <td>
+        ${l.photo?`<img src="${l.photo}" style="width:32px;height:32px;border-radius:6px;object-fit:cover;border:1px solid var(--border);margin-right:6px;vertical-align:middle;">`:
+        '<span style="display:inline-block;width:32px;height:32px;background:var(--blue-lt);border-radius:6px;text-align:center;line-height:32px;font-size:14px;margin-right:6px;vertical-align:middle;">🚂</span>'}
+        <span style="font-family:monospace;font-weight:700;color:var(--blue)">${(l.locoNumber||'--').toString().replace(/[<>]/g,'')}</span>
+      </td>
       <td>${l.name||'--'}</td><td style="font-family:monospace">${l.ipAddress}</td>
       <td>${l.depot||'--'}</td><td>${l.series||'--'}</td>
       <td style="text-align:center">${l.tmCount||6}</td>
@@ -1071,6 +1192,10 @@ function handleSensorUpdate(locoId, tmData, timestamp) {
 
   // Update TM grid if on dashboard for this loco
   if (selectedLocoId === locoId) {
+    // Update sparkline data
+    Object.keys(tmData).forEach(tm => {
+      if(tmData[tm]?.vib?.rms != null) updateSparkline(locoId, tm, tmData[tm].vib.rms);
+    });
     updateTmGrid();
     // Update live log
     Object.keys(tmData).forEach(tm => {
@@ -1101,7 +1226,8 @@ function showPage(name) {
   // Update browser tab title
   const titles = {overview:'Overview',dashboard:'TM Dashboard',vibration:'Vibration Analysis',
     temperature:'Temperature',prediction:'Bearing Life',livedata:'Live Data Log',
-    alarms:'Alarms',locos:'Manage Locos',users:'Manage Users',config:'Configuration',reports:'Reports'};
+    alarms:'Alarms',locos:'Manage Locos',users:'Manage Users',config:'Configuration',
+    reports:'Reports',fleet:'Fleet Overview',email:'Email Reports',maintenance:'Maintenance Log'};
   document.title = (titles[name]||name) + ' | LOCO TM CMS';
   document.querySelectorAll('.nav-item').forEach(n => {
     if (n.getAttribute('onclick')?.includes(`'${name}'`)) n.classList.add('active');
@@ -1127,6 +1253,11 @@ function showPage(name) {
     renderLocoSelectors(); loadPredictions();
   }
   if (name === 'livedata') { if(!selectedLocoId && locos.length) selectLoco(locos[0].id, 'live'); }
+  if (name === 'fleet') loadFleet();
+  if (name === 'email') { loadEmailConfig(); populatePdfLoco(); }
+  if (name === 'maintenance') loadMaintPage();
+  if (name === 'reports') populateReportLoco();
+  document.getElementById('sidebar').classList.remove('open');
 }
 
 // ========== OVERVIEW ==========
@@ -1352,6 +1483,19 @@ function openLocoModal(editId) {
   document.getElementById('locoModal').classList.add('show');
 }
 
+function previewLocoPhoto(input) {
+  if(!input.files?.[0]) return;
+  const file = input.files[0];
+  if(file.size > 500000) { showToast('Photo too large! Max 500KB', 'error'); return; }
+  const reader = new FileReader();
+  reader.onload = e => {
+    const preview = document.getElementById('loco_photo_preview');
+    preview.src = e.target.result;
+    preview.style.display = 'block';
+  };
+  reader.readAsDataURL(file);
+}
+
 async function saveLoco() {
   const id = document.getElementById('loco_id').value;
   const body = { locoNumber:document.getElementById('loco_number').value, name:document.getElementById('loco_name').value, ipAddress:document.getElementById('loco_ip').value, depot:document.getElementById('loco_depot').value, series:document.getElementById('loco_series').value, tmCount:parseInt(document.getElementById('loco_tmCount').value) };
@@ -1549,6 +1693,254 @@ async function sendManualEmail() {
   const d = await r.json();
   if(r.ok) showToast('✅ Email report sent!', 'success');
   else showToast('❌ ' + (d.error || 'Failed'), 'error');
+}
+
+
+
+// ════════════════════════════════════════════════════════════════
+// FEATURE 1: DARK/LIGHT MODE TOGGLE
+// ════════════════════════════════════════════════════════════════
+let isDark = localStorage.getItem('tm_theme') === 'dark';
+function applyTheme() {
+  document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light');
+  const btn = document.getElementById('themeBtn');
+  if(btn) btn.textContent = isDark ? '☀️' : '🌙';
+}
+function toggleTheme() {
+  isDark = !isDark;
+  localStorage.setItem('tm_theme', isDark ? 'dark' : 'light');
+  applyTheme();
+}
+// Apply saved theme on load
+applyTheme();
+
+// ════════════════════════════════════════════════════════════════
+// FEATURE 2: AUTO-REFRESH INTERVAL
+// ════════════════════════════════════════════════════════════════
+let refreshIntervalMs = 5000;
+let overviewRefreshTimer = null;
+
+function setRefreshInterval(ms) {
+  refreshIntervalMs = parseInt(ms);
+  if(overviewRefreshTimer) clearInterval(overviewRefreshTimer);
+  overviewRefreshTimer = setInterval(refreshOverview, refreshIntervalMs);
+  showToast('Refresh interval: ' + (refreshIntervalMs/1000) + 's', 'success');
+}
+
+// ════════════════════════════════════════════════════════════════
+// FEATURE 3: ALARM SOUND NOTIFICATION
+// ════════════════════════════════════════════════════════════════
+let alarmSoundEnabled = localStorage.getItem('tm_alarm_sound') !== 'false';
+let lastAlarmCount = 0;
+
+function playAlarmSound(type = 'critical') {
+  if(!alarmSoundEnabled) return;
+  try {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const oscillator = ctx.createOscillator();
+    const gainNode = ctx.createGain();
+    oscillator.connect(gainNode);
+    gainNode.connect(ctx.destination);
+    oscillator.type = 'square';
+    oscillator.frequency.setValueAtTime(type === 'critical' ? 880 : 440, ctx.currentTime);
+    gainNode.gain.setValueAtTime(0.3, ctx.currentTime);
+    gainNode.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.5);
+    oscillator.start(ctx.currentTime);
+    oscillator.stop(ctx.currentTime + 0.5);
+    if(type === 'critical') {
+      setTimeout(() => {
+        const o2 = ctx.createOscillator();
+        const g2 = ctx.createGain();
+        o2.connect(g2); g2.connect(ctx.destination);
+        o2.frequency.value = 660; g2.gain.setValueAtTime(0.3, ctx.currentTime);
+        g2.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.5);
+        o2.start(); o2.stop(ctx.currentTime + 0.5);
+      }, 600);
+    }
+  } catch(e) {}
+}
+
+// Check for new alarms and play sound
+function checkAlarmSound() {
+  const unack = alarms.filter(a => !a.acknowledged).length;
+  if(unack > lastAlarmCount) {
+    const newAlarms = alarms.slice(0, unack - lastAlarmCount);
+    const hasCritical = newAlarms.some(a => a.type?.includes('CRITICAL'));
+    playAlarmSound(hasCritical ? 'critical' : 'warning');
+    if(hasCritical) {
+      showToast('🚨 CRITICAL ALARM! Check Alarm Centre', 'error');
+    }
+  }
+  lastAlarmCount = unack;
+}
+
+// ════════════════════════════════════════════════════════════════
+// FEATURE 4: OVERALL LOCO HEALTH SCORE
+// ════════════════════════════════════════════════════════════════
+function calcLocoHealth(locoId) {
+  const ld = latestData[locoId] || {};
+  const tms = Object.values(ld).filter(d => d && d.ioLinkStatus === 'OK');
+  if(!tms.length) return null;
+  const critRms = config?.vibThresholds?.critical?.rms || 8;
+  const critT = config?.tempThresholds?.critical || 85;
+  let totalHealth = 0;
+  tms.forEach(d => {
+    const vibH = d.vib?.rms ? Math.max(0, 100 - (d.vib.rms / critRms * 100)) : 100;
+    const tempH = d.temp ? Math.max(0, 100 - ((d.temp - 30) / (critT - 30) * 100)) : 100;
+    totalHealth += (vibH + tempH) / 2;
+  });
+  return Math.round(totalHealth / tms.length);
+}
+
+function getHealthColor(score) {
+  if(score === null) return '#A0AEC0';
+  if(score >= 80) return '#48BB78';
+  if(score >= 60) return '#F6AD55';
+  return '#FC8181';
+}
+
+function getHealthLabel(score) {
+  if(score === null) return 'N/A';
+  if(score >= 80) return 'Good';
+  if(score >= 60) return 'Fair';
+  if(score >= 40) return 'Poor';
+  return 'Critical';
+}
+
+// ════════════════════════════════════════════════════════════════
+// FEATURE 5: SPARKLINE CHART ON TM CARD
+// ════════════════════════════════════════════════════════════════
+const sparklineData = {}; // Store recent values per TM
+
+function updateSparkline(locoId, tm, rmsValue) {
+  const key = locoId + '_' + tm;
+  if(!sparklineData[key]) sparklineData[key] = [];
+  sparklineData[key].push(rmsValue);
+  if(sparklineData[key].length > 20) sparklineData[key].shift();
+}
+
+function drawSparkline(canvasId, data, color) {
+  const canvas = document.getElementById(canvasId);
+  if(!canvas || !data || data.length < 2) return;
+  const ctx = canvas.getContext('2d');
+  const w = canvas.width, h = canvas.height;
+  ctx.clearRect(0,0,w,h);
+  const max = Math.max(...data, 0.1);
+  const min = Math.min(...data);
+  ctx.beginPath();
+  ctx.strokeStyle = color || '#3182CE';
+  ctx.lineWidth = 1.5;
+  ctx.lineJoin = 'round';
+  data.forEach((v, i) => {
+    const x = (i / (data.length-1)) * w;
+    const y = h - ((v - min) / (max - min || 1)) * h * 0.8 - h*0.1;
+    i === 0 ? ctx.moveTo(x,y) : ctx.lineTo(x,y);
+  });
+  ctx.stroke();
+}
+
+// ════════════════════════════════════════════════════════════════
+// FEATURE 6: MAINTENANCE LOG
+// ════════════════════════════════════════════════════════════════
+let maintenanceLogs = JSON.parse(localStorage.getItem('tm_maintenance') || '[]');
+
+function openMaintModal() {
+  document.getElementById('maint_date').value = new Date().toISOString().split('T')[0];
+  document.getElementById('maint_desc').value = '';
+  document.getElementById('maint_by').value = currentUser?.name || '';
+  document.getElementById('maintModal').classList.add('show');
+}
+
+function saveMaintEntry() {
+  const entry = {
+    id: 'maint_' + Date.now(),
+    locoId: selectedLocoId,
+    locoNumber: locos.find(l=>l.id===selectedLocoId)?.locoNumber || '--',
+    tm: document.getElementById('maint_tm').value,
+    type: document.getElementById('maint_type').value,
+    description: document.getElementById('maint_desc').value,
+    doneBy: document.getElementById('maint_by').value,
+    date: document.getElementById('maint_date').value,
+    nextDue: document.getElementById('maint_next').value,
+    status: document.getElementById('maint_status').value,
+    createdAt: new Date().toISOString()
+  };
+  if(!entry.description) { showToast('Enter description', 'error'); return; }
+  maintenanceLogs.unshift(entry);
+  localStorage.setItem('tm_maintenance', JSON.stringify(maintenanceLogs));
+  closeModal('maintModal');
+  renderMaintTable();
+  showToast('Maintenance entry saved!', 'success');
+}
+
+function renderMaintTable() {
+  const tbody = document.getElementById('maintTableBody'); if(!tbody) return;
+  const locoLogs = maintenanceLogs.filter(l => !selectedLocoId || l.locoId === selectedLocoId);
+  if(!locoLogs.length) {
+    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--text3);padding:30px;">No maintenance records for this locomotive.</td></tr>';
+    return;
+  }
+  tbody.innerHTML = locoLogs.map(l => {
+    const sc = l.status === 'completed' ? 'var(--green)' : l.status === 'pending' ? 'var(--red)' : '#D69E2E';
+    const overdue = l.nextDue && new Date(l.nextDue) < new Date() && l.status !== 'completed';
+    return `<tr${overdue?' style="background:#FFF5F5"':''}>
+      <td style="font-family:monospace;font-size:12px">${l.date || '--'}</td>
+      <td><span style="background:var(--blue-lt);color:var(--blue);padding:2px 8px;border-radius:8px;font-size:11px;font-weight:700">${l.tm}</span></td>
+      <td style="font-size:13px">${l.type}</td>
+      <td style="font-size:12px;color:var(--text2)">${l.description}</td>
+      <td style="font-size:12px">${l.doneBy || '--'}</td>
+      <td style="font-size:12px;color:${overdue?'var(--red)':'inherit'}${overdue?';font-weight:700':''}">
+        ${l.nextDue || '--'}${overdue?' ⚠️ OVERDUE':''}
+      </td>
+      <td><span style="background:${sc};color:white;padding:2px 8px;border-radius:8px;font-size:11px;font-weight:700;text-transform:uppercase">${l.status}</span></td>
+    </tr>`;
+  }).join('');
+}
+
+function loadMaintPage() {
+  // Populate loco selector for maintenance
+  const sel = document.getElementById('maintLocoSel');
+  if(sel) {
+    sel.innerHTML = [
+      `<div class="loco-chip ${!selectedLocoId?'active':''}" onclick="selectedLocoId=null;renderMaintTable()">All</div>`,
+      ...locos.map(l => `<div class="loco-chip ${selectedLocoId===l.id?'active':''}" onclick="selectedLocoId='${l.id}';renderMaintTable()">${l.locoNumber}</div>`)
+    ].join('');
+  }
+  renderMaintTable();
+}
+
+// ════════════════════════════════════════════════════════════════
+// FEATURE 7: SCHEDULED CSV EXPORT (daily)
+// ════════════════════════════════════════════════════════════════
+function checkScheduledExport() {
+  const lastExport = localStorage.getItem('tm_last_export');
+  const today = new Date().toDateString();
+  if(lastExport !== today && liveLogRows.length > 100) {
+    exportLiveCSV();
+    localStorage.setItem('tm_last_export', today);
+    showToast('Daily CSV auto-exported!', 'success');
+  }
+}
+
+// Run export check every hour
+setInterval(checkScheduledExport, 3600000);
+
+// ════════════════════════════════════════════════════════════════
+// FEATURE 8: OVERVIEW HEALTH SCORE UPDATE
+// ════════════════════════════════════════════════════════════════
+// Override refreshOverview to include health scores
+const _origRefreshOverview = refreshOverview;
+function refreshOverview() {
+  _origRefreshOverview();
+  // Check alarm sound after refresh
+  checkAlarmSound();
+  // Update health scores on overview cards
+  locos.forEach(l => {
+    const score = calcLocoHealth(l.id);
+    const color = getHealthColor(score);
+    const label = getHealthLabel(score);
+    // Find health score elements if any
+  });
 }
 
 
