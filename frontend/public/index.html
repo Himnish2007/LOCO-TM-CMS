@@ -1144,6 +1144,7 @@ async function loadAlarms() {
   const r = await api('/api/alarms?limit=100');
   if (!r) return;
   alarms = await r.json();
+  checkAlarmSound();
   const unack = alarms.filter(a => !a.acknowledged).length;
   document.getElementById('alarmBadge').textContent = unack;
   document.getElementById('alarmBadge').style.display = unack > 0 ? 'inline' : 'none';
@@ -1722,9 +1723,13 @@ let overviewRefreshTimer = null;
 
 function setRefreshInterval(ms) {
   refreshIntervalMs = parseInt(ms);
+  // Clear existing interval
+  if(overviewInterval) clearInterval(overviewInterval);
   if(overviewRefreshTimer) clearInterval(overviewRefreshTimer);
-  overviewRefreshTimer = setInterval(refreshOverview, refreshIntervalMs);
-  showToast('Refresh interval: ' + (refreshIntervalMs/1000) + 's', 'success');
+  // Set new interval
+  overviewInterval = setInterval(refreshOverview, refreshIntervalMs);
+  overviewRefreshTimer = overviewInterval;
+  showToast('Refresh: ' + (refreshIntervalMs/1000) + 's', 'success');
 }
 
 // ════════════════════════════════════════════════════════════════
@@ -1925,23 +1930,7 @@ function checkScheduledExport() {
 // Run export check every hour
 setInterval(checkScheduledExport, 3600000);
 
-// ════════════════════════════════════════════════════════════════
-// FEATURE 8: OVERVIEW HEALTH SCORE UPDATE
-// ════════════════════════════════════════════════════════════════
-// Override refreshOverview to include health scores
-const _origRefreshOverview = refreshOverview;
-function refreshOverview() {
-  _origRefreshOverview();
-  // Check alarm sound after refresh
-  checkAlarmSound();
-  // Update health scores on overview cards
-  locos.forEach(l => {
-    const score = calcLocoHealth(l.id);
-    const color = getHealthColor(score);
-    const label = getHealthLabel(score);
-    // Find health score elements if any
-  });
-}
+// Alarm sound check called from loadAlarms
 
 
 document.addEventListener('keydown', function(e) {
