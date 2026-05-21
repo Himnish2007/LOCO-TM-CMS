@@ -1246,6 +1246,7 @@ function showPage(name) {
   }
   if (name === 'vibration') {
     if(!selectedLocoId && locos.length) { selectedLocoId = locos[0].id; }
+    selectedTmKey = 'TM1'; // Always start with TM1
     renderLocoSelectors(); renderVibTmSel(); loadVibData();
   }
   if (name === 'temperature') {
