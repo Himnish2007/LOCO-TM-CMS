@@ -162,7 +162,10 @@ app.delete('/api/users/:id', auth, adminOnly, (req, res) => {
 app.get('/api/locos', auth, (req, res) => {
   if (req.user.role === 'admin') return res.json(db.locos);
   const user = db.users.find(u => u.id === req.user.id);
-  res.json(db.locos.filter(l => user?.assignedLocos?.includes(l.id)));
+  const assigned = user?.assignedLocos || [];
+  // If no locos assigned, show all (useful for supervisors)
+  if (assigned.length === 0) return res.json(db.locos);
+  res.json(db.locos.filter(l => assigned.includes(l.id)));
 });
 
 app.post('/api/locos', auth, adminOnly, (req, res) => {
@@ -562,11 +565,11 @@ function broadcast(locoId, tmData, timestamp) {
   const msg = JSON.stringify({ type: 'sensorUpdate', locoId, tmData, timestamp });
   clients.forEach((c, ws) => {
     if (ws.readyState !== WebSocket.OPEN) return;
-    if (c.user.role === 'admin') ws.send(msg);
-    else {
-      const u = db.users.find(u => u.id === c.user.id);
-      if (u?.assignedLocos?.includes(locoId)) ws.send(msg);
-    }
+    if (c.user.role === 'admin') { ws.send(msg); return; }
+    // For operators/supervisors - send if assigned OR if no locos assigned (all access)
+    const u = db.users.find(u => u.id === c.user.id);
+    const assigned = u?.assignedLocos || [];
+    if (assigned.length === 0 || assigned.includes(locoId)) ws.send(msg);
   });
 }
 

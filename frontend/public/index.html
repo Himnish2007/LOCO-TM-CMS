@@ -749,7 +749,11 @@ function refreshOverview() {
 function renderLocoSelectors() {
   ['dashLocoSel','vibLocoSel','tempLocoSel','predLocoSel','liveLocoSel'].forEach(id => {
     const el = document.getElementById(id); if (!el) return;
-    el.innerHTML = locos.map(l => `<div class="loco-chip ${selectedLocoId===l.id?'active':''}" onclick="selectLoco('${l.id}','${id.replace('LocoSel','')}')"><div class="chip-dot ${l.status||'offline'}"></div>${l.locoNumber||l.name}</div>`).join('')||'<div style="color:var(--text3);font-size:12px;">No locomotives</div>';
+    if(!locos.length) {
+      el.innerHTML = '<div style="color:var(--text3);font-size:12px;">No locomotives assigned</div>';
+      return;
+    }
+    el.innerHTML = locos.map(l => `<div class="loco-chip ${selectedLocoId===l.id?'active':''}" onclick="selectLoco('${l.id}','${id.replace('LocoSel','')}')"><div class="chip-dot ${l.status||'offline'}"></div>${l.locoNumber||l.name||l.id}</div>`).join('');
   });
 }
 
@@ -947,7 +951,10 @@ async function initApp() {
 
   await Promise.all([loadLocos(), loadConfig()]);
   if (currentUser?.role === 'admin') await loadUsers();
-  if (locos.length > 0 && !selectedLocoId) selectedLocoId = locos[0].id;
+  // Auto-select first loco for all users
+  if (locos.length > 0) {
+    selectedLocoId = locos[0].id;
+  }
   connectWS();
   startClock();
   showPage('overview');
@@ -1103,10 +1110,22 @@ function showPage(name) {
   if (name === 'alarms') loadAlarms();
   if (name === 'locos') renderLocoTable();
   if (name === 'users') renderUserTable();
-  if (name === 'dashboard') { if(!selectedLocoId && locos.length) selectLoco(locos[0].id, 'dash'); updateTmGrid(); }
-  if (name === 'vibration') { if(!selectedLocoId && locos.length) selectLoco(locos[0].id, 'vib'); renderVibTmSel(); loadVibData(); }
-  if (name === 'temperature') { if(!selectedLocoId && locos.length) selectLoco(locos[0].id, 'temp'); loadTempData(); }
-  if (name === 'prediction') { if(!selectedLocoId && locos.length) selectLoco(locos[0].id, 'pred'); loadPredictions(); }
+  if (name === 'dashboard') {
+    if(!selectedLocoId && locos.length) { selectedLocoId = locos[0].id; }
+    renderLocoSelectors(); updateTmGrid();
+  }
+  if (name === 'vibration') {
+    if(!selectedLocoId && locos.length) { selectedLocoId = locos[0].id; }
+    renderLocoSelectors(); renderVibTmSel(); loadVibData();
+  }
+  if (name === 'temperature') {
+    if(!selectedLocoId && locos.length) { selectedLocoId = locos[0].id; }
+    renderLocoSelectors(); loadTempData();
+  }
+  if (name === 'prediction') {
+    if(!selectedLocoId && locos.length) { selectedLocoId = locos[0].id; }
+    renderLocoSelectors(); loadPredictions();
+  }
   if (name === 'livedata') { if(!selectedLocoId && locos.length) selectLoco(locos[0].id, 'live'); }
 }
 
