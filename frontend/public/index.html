@@ -1361,8 +1361,8 @@ async function loadVibData() {
       }]
     },
     options: { responsive:true, animation:false, plugins:{legend:{labels:{color:'#4A5568',font:{family:'Inter',size:10}}}},
-      scales:{x:{ticks:{color:'#718096',maxTicksLimit:8,font:{family:'Inter',size:9}},grid:{color:'#0f3050'}},
-              y:{ticks:{color:'#718096',font:{family:'Inter',size:9}},grid:{color:'#0f3050'},title:{display:true,text:'m/s²',color:'#718096'}}} }
+      scales:{x:{ticks:{color:'#718096',maxTicksLimit:8,font:{family:'Inter',size:9}},grid:{color:'#EDF2F7'}},
+              y:{ticks:{color:'#718096',font:{family:'Inter',size:9}},grid:{color:'#EDF2F7'},title:{display:true,text:'m/s²',color:'#718096'}}} }
   });
 
   // Comparison chart
@@ -1377,8 +1377,8 @@ async function loadVibData() {
       ]
     },
     options:{responsive:true,animation:false,plugins:{legend:{labels:{color:'#4A5568',font:{family:'Inter',size:9}}}},
-      scales:{x:{ticks:{color:'#718096',maxTicksLimit:8,font:{family:'Inter',size:9}},grid:{color:'#0f3050'}},
-              y:{ticks:{color:'#718096',font:{family:'Inter',size:9}},grid:{color:'#0f3050'}}}}
+      scales:{x:{ticks:{color:'#718096',maxTicksLimit:8,font:{family:'Inter',size:9}},grid:{color:'#EDF2F7'}},
+              y:{ticks:{color:'#718096',font:{family:'Inter',size:9}},grid:{color:'#EDF2F7'}}}}
   });
 
   // Stats
@@ -1436,9 +1436,19 @@ async function loadTempData() {
   const ctx = document.getElementById('tempTrendChart')?.getContext('2d');
   if (ctx) charts.tempTrend = new Chart(ctx, {
     type:'line', data:{labels, datasets},
-    options:{responsive:true,animation:false,plugins:{legend:{labels:{color:'#4A5568',font:{family:'Inter',size:10}}}},
-      scales:{x:{ticks:{color:'#718096',maxTicksLimit:10,font:{family:'Inter',size:9}},grid:{color:'#0f3050'}},
-              y:{ticks:{color:'#718096',font:{family:'Inter',size:9}},grid:{color:'#0f3050'},title:{display:true,text:'°C',color:'#718096'}}}}
+    options:{responsive:true,animation:false,
+      plugins:{legend:{labels:{color:'#4A5568',font:{family:'Inter',size:10}}}},
+      scales:{
+        x:{ticks:{color:'#718096',maxTicksLimit:10,font:{family:'Inter',size:9}},grid:{color:'#EDF2F7'}},
+        y:{
+          min:0, max:150,
+          ticks:{color:'#718096',font:{family:'Inter',size:9},stepSize:25,
+            callback: function(v){return v+' C';}},
+          grid:{color:'#EDF2F7'},
+          title:{display:true,text:'Temperature (deg C)',color:'#718096',font:{size:11}}
+        }
+      }
+    }
   });
 
   // Temp gauges
