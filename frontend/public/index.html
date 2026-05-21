@@ -1098,6 +1098,7 @@ function showPage(name) {
   if (name === 'temperature') { if(!selectedLocoId && locos.length) selectLoco(locos[0].id, 'temp'); loadTempData(); }
   if (name === 'prediction') { if(!selectedLocoId && locos.length) selectLoco(locos[0].id, 'pred'); loadPredictions(); }
   if (name === 'livedata') { if(!selectedLocoId && locos.length) selectLoco(locos[0].id, 'live'); }
+  if (name === 'email') { loadEmailConfig(); populatePdfLoco(); }
 }
 
 // ========== OVERVIEW ==========
