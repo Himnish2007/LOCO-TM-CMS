@@ -1,6 +1,6 @@
 {
   "name": "loco-tm-cms",
-  "version": "2.0.0",
+  "version": "3.0.0",
   "description": "LOCO TM Condition Monitoring System - Himnish Limited",
   "main": "backend/server.js",
   "scripts": {
@@ -13,6 +13,8 @@
     "cross-env": "^7.0.3",
     "express": "^4.18.2",
     "jsonwebtoken": "^9.0.2",
+    "nodemailer": "^6.9.8",
+    "node-cron": "^3.0.3",
     "ws": "^8.16.0"
   },
   "engines": { "node": ">=18.0.0" }

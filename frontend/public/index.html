@@ -443,6 +443,61 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--f
         </div>
       </div>
 
+      <div class="page" id="page-fleet">
+        <div class="page-header">
+          <div><div class="page-title">Fleet <span>Overview</span></div><div class="page-sub">Depot-wise locomotive health summary</div></div>
+          <button class="btn btn-ghost btn-sm" onclick="loadFleet()">↺ Refresh</button>
+        </div>
+        <div id="fleetGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:14px;"></div>
+      </div>
+
+      <div class="page" id="page-email">
+        <div class="page-header">
+          <div><div class="page-title">Email <span>Reports</span></div><div class="page-sub">Scheduled & manual email report configuration</div></div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+          <div class="card">
+            <div class="card-title">Email Configuration</div>
+            <div id="emailStatus" style="padding:12px;border-radius:8px;margin-bottom:14px;font-size:13px;background:#FFF5F5;color:#9B2C2C;border:1px solid #FEB2B2;">
+              ⚠️ Email not configured. Add EMAIL_USER and EMAIL_APP_PASSWORD in Railway variables.
+            </div>
+            <div class="f-group"><label class="f-label">Send Reports To (comma-separated emails)</label><input type="email" class="f-input" id="email_to" placeholder="piyush@himnishindia.com"></div>
+            <div class="f-group"><label class="f-label">Schedule</label>
+              <select class="f-select" id="email_schedule">
+                <option value="0 8 * * *">Daily at 8:00 AM</option>
+                <option value="0 8 * * 1">Weekly (Monday 8 AM)</option>
+                <option value="0 8 1 * *">Monthly (1st of month)</option>
+                <option value="0 8,20 * * *">Twice daily (8 AM & 8 PM)</option>
+              </select>
+            </div>
+            <div style="display:flex;gap:8px;">
+              <button class="btn btn-primary" onclick="saveEmailConfig()" style="flex:1">Save Configuration</button>
+              <button class="btn btn-ghost" onclick="sendTestEmail()">Send Test Email</button>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-title">How to Enable Email Reports</div>
+            <div style="font-size:13px;color:var(--text2);line-height:1.8;">
+              <div style="margin-bottom:8px;"><strong style="color:var(--navy)">Step 1:</strong> Enable 2-Step Verification on your Gmail account</div>
+              <div style="margin-bottom:8px;"><strong style="color:var(--navy)">Step 2:</strong> Go to Google Account → Security → App Passwords</div>
+              <div style="margin-bottom:8px;"><strong style="color:var(--navy)">Step 3:</strong> Generate App Password for "Mail"</div>
+              <div style="margin-bottom:8px;"><strong style="color:var(--navy)">Step 4:</strong> In Railway → Variables, add:<br>
+                <code style="background:var(--bg3);padding:4px 8px;border-radius:4px;font-size:11px;display:block;margin-top:4px">EMAIL_USER = your@gmail.com<br>EMAIL_APP_PASSWORD = xxxx xxxx xxxx xxxx<br>EMAIL_TO = piyush@himnishindia.com</code>
+              </div>
+              <div><strong style="color:var(--navy)">Step 5:</strong> Redeploy Railway — email scheduler starts automatically</div>
+            </div>
+          </div>
+        </div>
+        <div class="card" style="margin-top:14px;">
+          <div class="card-title">Manual Report</div>
+          <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+            <select class="f-select" id="pdf_loco" style="width:250px;"></select>
+            <button class="btn btn-primary" onclick="downloadPDFReport()">⬇ Download PDF Report</button>
+            <button class="btn btn-ghost" onclick="sendManualEmail()">📧 Send Email Now</button>
+          </div>
+        </div>
+      </div>
+
       <div class="page" id="page-reports">
         <div class="page-header"><div class="page-title">Generate <span>Report</span></div></div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
@@ -1365,6 +1420,107 @@ function startClock() {
 }
 
 // ESC key closes modals
+
+// ════════════════════════════════════════════════════════════════
+// FLEET OVERVIEW
+// ════════════════════════════════════════════════════════════════
+async function loadFleet() {
+  const r = await api('/api/depots'); if(!r) return;
+  const depots = await r.json();
+  const grid = document.getElementById('fleetGrid'); if(!grid) return;
+  if(!depots.length) { grid.innerHTML='<div style="color:var(--text3);text-align:center;padding:40px;grid-column:1/-1">No depot data available</div>'; return; }
+  grid.innerHTML = depots.map(depot => {
+    const locoCards = depot.locos.map(l => {
+      const ld = latestData[l.id] || {};
+      const onlineTMs = Object.values(ld).filter(d => d?.ioLinkStatus === 'OK').length;
+      const critTMs = Object.values(ld).filter(d => d?.vib?.rms >= (config?.vibThresholds?.critical?.rms||8) || d?.temp >= (config?.tempThresholds?.critical||85)).length;
+      return `<div style="background:var(--bg3);border-radius:8px;padding:10px;border:1px solid var(--border);cursor:pointer" onclick="selectLoco('${l.id}','dash');showPage('dashboard')">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+          <span style="font-weight:700;color:var(--navy);font-size:13px">${l.locoNumber}</span>
+          <span class="status-badge ${l.status==='online'?'status-online':'status-offline'}" style="font-size:10px;padding:2px 8px"><span class="status-dot"></span>${(l.status||'offline').toUpperCase()}</span>
+        </div>
+        <div style="font-size:11px;color:var(--text3)">${l.series||''} · ${onlineTMs} TMs active ${critTMs>0?'· <span style="color:var(--red);font-weight:700">'+critTMs+' CRITICAL</span>':''}</div>
+      </div>`;
+    }).join('');
+    return `<div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+        <div>
+          <div style="font-size:16px;font-weight:700;color:var(--navy)">${depot.name}</div>
+          <div style="font-size:12px;color:var(--text3);margin-top:2px">${depot.locos.length} Locomotive${depot.locos.length!==1?'s':''} · ${depot.totalTMs} TMs</div>
+        </div>
+        <div style="text-align:right">
+          <div style="font-size:22px;font-weight:700;color:${depot.online>0?'var(--green)':'var(--text4)'}">${depot.online}</div>
+          <div style="font-size:10px;color:var(--text3)">Online</div>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">${locoCards}</div>
+    </div>`;
+  }).join('');
+}
+
+// ════════════════════════════════════════════════════════════════
+// PDF REPORT
+// ════════════════════════════════════════════════════════════════
+function downloadPDFReport() {
+  const locoId = document.getElementById('pdf_loco')?.value || selectedLocoId;
+  if(!locoId) { showToast('Select a locomotive first', 'error'); return; }
+  const url = `${API}/api/report/${locoId}/pdf?_auth=${token}`;
+  window.open(url, '_blank');
+  showToast('Report opened in new tab!', 'success');
+}
+
+function populatePdfLoco() {
+  const sel = document.getElementById('pdf_loco'); if(!sel) return;
+  sel.innerHTML = locos.map(l => `<option value="${l.id}">${l.locoNumber||l.name} (${l.ipAddress})</option>`).join('') || '<option>No locos</option>';
+}
+
+// ════════════════════════════════════════════════════════════════
+// EMAIL REPORTS
+// ════════════════════════════════════════════════════════════════
+async function loadEmailConfig() {
+  const r = await api('/api/email/config'); if(!r) return;
+  const cfg = await r.json();
+  const status = document.getElementById('emailStatus'); if(!status) return;
+  if(cfg.configured) {
+    status.style.background = 'var(--green-lt)'; status.style.color = 'var(--green)'; status.style.borderColor = '#9AE6B4';
+    status.innerHTML = '✅ Email configured! Reports will be sent from ' + cfg.emailUser;
+  } else {
+    status.style.background = '#FFF5F5'; status.style.color = '#9B2C2C'; status.style.borderColor = '#FEB2B2';
+    status.innerHTML = '⚠️ Email not configured. Add EMAIL_USER and EMAIL_APP_PASSWORD in Railway Variables.';
+  }
+  if(document.getElementById('email_to')) document.getElementById('email_to').value = cfg.emailTo || '';
+  if(document.getElementById('email_schedule')) document.getElementById('email_schedule').value = cfg.schedule || '0 8 * * *';
+}
+
+async function saveEmailConfig() {
+  const to = document.getElementById('email_to')?.value;
+  const schedule = document.getElementById('email_schedule')?.value;
+  if(!to) { showToast('Enter email address', 'error'); return; }
+  const r = await api('/api/email/config', { method:'PUT', body: JSON.stringify({ recipients: to, schedule }) });
+  if(r?.ok) showToast('Email config saved!', 'success');
+  else showToast('Error saving config', 'error');
+}
+
+async function sendTestEmail() {
+  const to = document.getElementById('email_to')?.value;
+  showToast('Sending test email...', '');
+  const r = await api('/api/email/test', { method:'POST', body: JSON.stringify({ to }) });
+  if(!r) { showToast('Connection error', 'error'); return; }
+  const d = await r.json();
+  if(r.ok) showToast('✅ Test email sent! Check inbox.', 'success');
+  else showToast('❌ ' + (d.error || 'Email failed'), 'error');
+}
+
+async function sendManualEmail() {
+  showToast('Sending email report...', '');
+  const r = await api('/api/email/test', { method:'POST', body: JSON.stringify({}) });
+  if(!r) { showToast('Connection error', 'error'); return; }
+  const d = await r.json();
+  if(r.ok) showToast('✅ Email report sent!', 'success');
+  else showToast('❌ ' + (d.error || 'Failed'), 'error');
+}
+
+
 document.addEventListener('keydown', function(e) {
   if(e.key === 'Escape') {
     ['locoModal','userModal','confirmModal'].forEach(function(id) {
