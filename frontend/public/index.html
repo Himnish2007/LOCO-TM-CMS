@@ -610,7 +610,11 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--f
       <input type="hidden" id="usr_id">
       <div class="form-row"><div class="f-group"><label class="f-label">Username *</label><input class="f-input" id="usr_username" placeholder="username"></div><div class="f-group"><label class="f-label">Full Name</label><input class="f-input" id="usr_name" placeholder="Full Name"></div></div>
       <div class="form-row"><div class="f-group"><label class="f-label">Password</label><input type="password" class="f-input" id="usr_password" placeholder="Leave blank to keep"></div><div class="f-group"><label class="f-label">Email</label><input class="f-input" id="usr_email" placeholder="email@example.com"></div></div>
-      <div class="f-group"><label class="f-label">Role</label><select class="f-select" id="usr_role"><option value="operator">Operator</option><option value="supervisor">Supervisor</option><option value="admin">Administrator</option></select></div>
+      <div class="f-group"><label class="f-label">Role</label><select class="f-select" id="usr_role">
+  <option value="operator">Operator (sees only assigned locos)</option>
+  <option value="supervisor">Supervisor (sees all locos, no admin)</option>
+  <option value="admin">Administrator (full access)</option>
+</select></div>
       <div class="f-group"><label class="f-label">Assign Locomotives</label><div class="loco-check-list" id="locoCheckList"></div></div>
     </div>
     <div class="modal-footer"><button class="btn btn-ghost" onclick="closeModal('userModal')">Cancel</button><button class="btn btn-primary" onclick="saveUser()">Save User</button></div>
@@ -1476,14 +1480,20 @@ function updateTempCharts() { if(document.getElementById('page-temperature').cla
 
 function exportLiveCSV() {
   if (!liveLogRows.length) { showToast('No data to export','error'); return; }
-  let csv = 'Timestamp,Loco,TM,VibX,VibY,VibZ,RMS,Peak,CrestFactor,Temperature\n';
+  // Format: Date | Time | Loco | TM | VibX | VibY | VibZ | RMS | Peak | CrestFactor | Temperature
+  let csv = 'Date,Time,Loco,TM,VibX,VibY,VibZ,RMS,Peak,CrestFactor,Temperature\n';
   liveLogRows.forEach(r => {
-    csv += `${r.timestamp},${r.loco||''},${r.tm},${r.vib?.x||''},${r.vib?.y||''},${r.vib?.z||''},${r.vib?.rms||''},${r.vib?.peak||''},${r.vib?.crestFactor||''},${r.temp||''}\n`;
+    const dt = new Date(r.timestamp);
+    const date = dt.toLocaleDateString('en-IN').replace(/\//g,'/');
+    const time = dt.toLocaleTimeString('en-IN', {hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:false});
+    csv += `${date},${time},${r.loco||''},${r.tm},${r.vib?.x!=null?r.vib.x.toFixed(4):''},${r.vib?.y!=null?r.vib.y.toFixed(4):''},${r.vib?.z!=null?r.vib.z.toFixed(4):''},${r.vib?.rms!=null?r.vib.rms.toFixed(4):''},${r.vib?.peak!=null?r.vib.peak.toFixed(4):''},${r.vib?.crestFactor!=null?r.vib.crestFactor.toFixed(2):''},${r.temp!=null?r.temp.toFixed(1):''}\n`;
   });
+  const loco = locos.find(l=>l.id===selectedLocoId);
+  const fname = `LOCO_${loco?.locoNumber||'ALL'}_${new Date().toISOString().slice(0,10)}.csv`;
   const blob = new Blob([csv], {type:'text/csv'});
   const a = document.createElement('a'); a.href=URL.createObjectURL(blob);
-  a.download='loco_tm_live_data.csv'; a.click();
-  showToast('CSV exported!','success');
+  a.download = fname; a.click();
+  showToast('CSV exported: '+fname,'success');
 }
 
 function clearLiveLog() { liveLogRows=[]; renderLiveLogTable(); }
