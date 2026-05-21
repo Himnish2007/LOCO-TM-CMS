@@ -483,6 +483,10 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--f
           <div class="card"><div class="card-title">Temperature Thresholds</div><div class="form-row"><div class="f-group"><label class="f-label">Warning (&#8451;)</label><input type="number" class="f-input" id="cfg_tempWarn" value="70"></div><div class="f-group"><label class="f-label">Critical (&#8451;)</label><input type="number" class="f-input" id="cfg_tempCrit" value="85"></div></div></div>
           <div class="card"><div class="card-title">Vibration Thresholds (RMS m/s&#178;)</div><div class="form-row"><div class="f-group"><label class="f-label">Warning RMS</label><input type="number" step="0.1" class="f-input" id="cfg_vibWarnRms" value="5.0"></div><div class="f-group"><label class="f-label">Critical RMS</label><input type="number" step="0.1" class="f-input" id="cfg_vibCritRms" value="8.0"></div></div><div class="form-row"><div class="f-group"><label class="f-label">Warning Peak</label><input type="number" step="0.1" class="f-input" id="cfg_vibWarnPeak" value="10.0"></div><div class="f-group"><label class="f-label">Critical Peak</label><input type="number" step="0.1" class="f-input" id="cfg_vibCritPeak" value="15.0"></div></div></div>
           <div class="card"><div class="card-title">Bearing Life Model</div><div class="f-group"><label class="f-label">Base Life (hours)</label><input type="number" class="f-input" id="cfg_bearingLife" value="50000"></div></div>
+          <div class="card"><div class="card-title">Vibration Baseline Filter</div>
+            <div class="f-group"><label class="f-label">Baseline / Noise Filter (m/s²)</label><input type="number" step="0.01" class="f-input" id="cfg_baseline" value="0.15" min="0" max="2"></div>
+            <div style="font-size:12px;color:var(--text3);margin-top:4px;">Vibrations below this value will be treated as 0 (ambient/table noise). Current: <span id="cfg_baseline_display" style="color:var(--blue);font-weight:700">0.15 m/s²</span></div>
+          </div>
         </div>
       </div>
 
@@ -707,7 +711,7 @@ function updateTmGrid() {
   const warnRms = config?.vibThresholds?.warning?.rms || 5;
   const critT = config?.tempThresholds?.critical || 85;
   const warnT = config?.tempThresholds?.warning || 70;
-  const BASELINE = 0.15; // Ignore vibrations below this (table/ambient noise)
+  const BASELINE = config?.vibBaseline ?? 0.15; // From config settings
 
   grid.innerHTML = Array.from({length:tmCount}, (_,i) => {
     const tm = `TM${i+1}`;
@@ -785,7 +789,7 @@ function updateTmGrid() {
   const detail = document.getElementById('tmDetailPanel'); if (!detail) return;
   if (!d) { detail.innerHTML = `<div class="card" style="grid-column:1/-1;text-align:center;color:var(--text3);padding:30px;">No data for ${selectedTmKey} yet</div>`; return; }
   // Apply baseline filter to detail panel too
-  const BL = 0.15;
+  const BL = config?.vibBaseline ?? 0.15;
   const fX = d.vib?.x != null && Math.abs(d.vib.x) > BL ? (Math.abs(d.vib.x)-BL).toFixed(4) : '0.0000';
   const fY = d.vib?.y != null && Math.abs(d.vib.y) > BL ? (Math.abs(d.vib.y)-BL).toFixed(4) : '0.0000';
   const fZ = d.vib?.z != null && Math.abs(d.vib.z) > BL ? (Math.abs(d.vib.z)-BL).toFixed(4) : '0.0000';
@@ -1141,6 +1145,11 @@ async function loadConfig() {
   document.getElementById('cfg_vibWarnPeak').value = config.vibThresholds.warning.peak;
   document.getElementById('cfg_vibCritPeak').value = config.vibThresholds.critical.peak;
   document.getElementById('cfg_bearingLife').value = config.bearingLifeBase;
+  const bl = config.vibBaseline ?? 0.15;
+  const blEl = document.getElementById('cfg_baseline');
+  if(blEl) blEl.value = bl;
+  const blDisp = document.getElementById('cfg_baseline_display');
+  if(blDisp) blDisp.textContent = bl + ' m/s²';
 }
 
 async function loadAlarms() {

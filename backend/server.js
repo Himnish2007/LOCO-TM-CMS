@@ -81,7 +81,8 @@ function loadDB() {
       logIntervalMinutes: 1,
       tempThresholds: { warning: 70, critical: 85 },
       vibThresholds: { warning: { rms: 5.0, peak: 10.0 }, critical: { rms: 8.0, peak: 15.0 } },
-      bearingLifeBase: 50000
+      bearingLifeBase: 50000,
+      vibBaseline: 0.15
     }
   };
 }
