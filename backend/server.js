@@ -242,6 +242,22 @@ app.post('/api/data/ingest', (req, res) => {
   });
   const li = db.locos.findIndex(l => l.id === loco.id);
   if (li >= 0) { db.locos[li].status = 'online'; db.locos[li].lastSeen = ts; }
+
+  // Auto-DISCONNECTED: if a TM has not received data for 30s, mark it disconnected
+  const now30 = Date.now();
+  const readings = db.sensorReadings[loco.id];
+  if (readings) {
+    Object.keys(readings).forEach(tm => {
+      const latest = readings[tm]?.latest;
+      if (latest && latest.ioLinkStatus !== 'DISCONNECTED' && latest.timestamp) {
+        const age = now30 - new Date(latest.timestamp).getTime();
+        if (age > 30000) { // 30 seconds
+          readings[tm].latest = { ioLinkStatus: 'DISCONNECTED', timestamp: ts, temp: null, vib: null };
+        }
+      }
+    });
+  }
+
   saveDB();
   broadcast(loco.id, tmData, ts);
   res.json({ success: true, processed: Object.keys(tmData).length });
