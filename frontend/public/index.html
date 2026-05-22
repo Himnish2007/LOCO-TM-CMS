@@ -373,7 +373,6 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--f
       <div class="nav-item" onclick="showPage('reports')"><span class="nav-icon">&#128202;</span> Generate Report</div>
       <div class="nav-item" onclick="showPage('fleet')"><span class="nav-icon">&#128642;</span> Fleet Overview</div>
       <div class="nav-item" onclick="showPage('maintenance')"><span class="nav-icon">&#128295;</span> Maintenance Log</div>
-      <div class="nav-item" onclick="showPage('odometer')"><span class="nav-icon">&#128344;</span> Travel Distance</div>
       <div class="nav-item admin-only" onclick="showPage('email')"><span class="nav-icon">&#128231;</span> Email Reports</div>
       <div class="nav-item" onclick="showPage('usp')"><span class="nav-icon">&#11088;</span> Why Himnish</div>
       <div class="nav-item" onclick="showPage('usp')"><span class="nav-icon">&#11088;</span> About / USP</div>
@@ -557,7 +556,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--f
               <div style="width:44px;height:44px;background:#EBF8FF;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:22px;">&#128642;</div>
               <div style="font-size:15px;font-weight:700;color:var(--navy);">Railway-First Design</div>
             </div>
-            <div style="font-size:13px;color:var(--text2);line-height:1.7;">Engineered specifically for Indian Railways WAP-7, WAP-5, WAG-9 traction motors — not adapted from generic industrial software. Every threshold, every parameter is tuned for railway operating conditions.</div>
+            <div style="font-size:13px;color:var(--text2);line-height:1.7;">Engineered specifically for Indian Railways WAP-7, WAP-5, WAG-9 series traction motors — not adapted from generic industrial software. Every threshold, every parameter is tuned for railway operating conditions.</div>
           </div>
 
           <div class="card" style="border-left:5px solid #0BC5EA;">
@@ -589,7 +588,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--f
               <div style="width:44px;height:44px;background:#FAF5FF;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:22px;">&#127760;</div>
               <div style="font-size:15px;font-weight:700;color:var(--navy);">Cloud + Edge Architecture</div>
             </div>
-            <div style="font-size:13px;color:var(--text2);line-height:1.7;">RUT200 4G industrial gateway as edge node — works on moving trains. Data securely transmitted to Railway.app cloud via HTTPS. Accessible from any device, anywhere, on any network.</div>
+            <div style="font-size:13px;color:var(--text2);line-height:1.7;">Industrial 4G Gateway 4G industrial gateway as edge node — works on moving trains. Data securely transmitted to Railway.app cloud via HTTPS. Accessible from any device, anywhere, on any network.</div>
           </div>
 
           <div class="card" style="border-left:5px solid #E53E3E;">
@@ -656,18 +655,18 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--f
           <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;">
             <div style="background:var(--bg3);border-radius:8px;padding:12px;text-align:center;border:1px solid var(--border);">
               <div style="font-size:11px;font-weight:700;color:var(--text3);letter-spacing:1px;margin-bottom:4px;">SENSOR</div>
-              <div style="font-size:13px;font-weight:600;color:var(--navy);">BCM0003 IO-Link</div>
-              <div style="font-size:11px;color:var(--text3);">Balluff Triaxial + Temp</div>
+              <div style="font-size:13px;font-weight:600;color:var(--navy);">IO-Link Sensor</div>
+              <div style="font-size:11px;color:var(--text3);">Triaxial Accelerometer + Temperature</div>
             </div>
             <div style="background:var(--bg3);border-radius:8px;padding:12px;text-align:center;border:1px solid var(--border);">
               <div style="font-size:11px;font-weight:700;color:var(--text3);letter-spacing:1px;margin-bottom:4px;">IO-LINK MASTER</div>
-              <div style="font-size:13px;font-weight:600;color:var(--navy);">BNI00L1 (8-Port)</div>
-              <div style="font-size:11px;color:var(--text3);">Balluff IO-Link Master</div>
+              <div style="font-size:13px;font-weight:600;color:var(--navy);">IO-Link Master (8-Port)</div>
+              <div style="font-size:11px;color:var(--text3);">Industrial IO-Link Master</div>
             </div>
             <div style="background:var(--bg3);border-radius:8px;padding:12px;text-align:center;border:1px solid var(--border);">
               <div style="font-size:11px;font-weight:700;color:var(--text3);letter-spacing:1px;margin-bottom:4px;">EDGE GATEWAY</div>
-              <div style="font-size:13px;font-weight:600;color:var(--navy);">RUT200</div>
-              <div style="font-size:11px;color:var(--text3);">Teltonika 4G Router</div>
+              <div style="font-size:13px;font-weight:600;color:var(--navy);">Industrial 4G Gateway</div>
+              <div style="font-size:11px;color:var(--text3);">Industrial 4G/WiFi Router</div>
             </div>
             <div style="background:var(--bg3);border-radius:8px;padding:12px;text-align:center;border:1px solid var(--border);">
               <div style="font-size:11px;font-weight:700;color:var(--text3);letter-spacing:1px;margin-bottom:4px;">PROTOCOL</div>
@@ -771,27 +770,6 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--f
       </div>
 
       <!-- ═══ TRAVEL DISTANCE / ODOMETER PAGE ═══ -->
-      <div class="page" id="page-odometer">
-        <div class="page-header">
-          <div><div class="page-title">Travel <span>Distance</span></div><div class="page-sub">Locomotive odometer — total km run per loco</div></div>
-          <div class="page-actions"><button class="btn btn-ghost btn-sm" onclick="loadOdometer()">&#8634; Refresh</button></div>
-        </div>
-        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px;" id="odometerGrid">
-          <div style="grid-column:1/-1;text-align:center;color:var(--text3);padding:30px;">Loading...</div>
-        </div>
-        <!-- Update modal inline -->
-        <div id="odometerUpdateBox" style="display:none;background:var(--card);border:1px solid var(--border);border-radius:var(--radius2);padding:20px;margin-top:16px;max-width:420px;">
-          <div style="font-size:14px;font-weight:700;color:var(--navy);margin-bottom:12px;">Update Odometer Reading</div>
-          <input type="hidden" id="odo_locoId">
-          <div class="f-group"><label class="f-label" id="odo_locoLabel">Loco</label><input type="number" class="f-input" id="odo_km" placeholder="Total km run" min="0" step="1"></div>
-          <div style="display:flex;gap:8px;margin-top:12px;">
-            <button class="btn btn-primary" onclick="saveOdometer()">Save Reading</button>
-            <button class="btn btn-ghost" onclick="document.getElementById('odometerUpdateBox').style.display='none'">Cancel</button>
-          </div>
-        </div>
-      </div>
-
-      <!-- ═══ USP / ABOUT PAGE ═══ -->
       <div class="page" id="page-usp">
         <div class="page-header">
           <div><div class="page-title">About <span>LOCO TM CMS</span></div><div class="page-sub">Why choose Himnish Limited's Condition Monitoring System</div></div>
@@ -813,7 +791,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--f
             ['📊','Frequency Spectrum (FFT)','Time-domain vibration data converted to frequency spectrum using FFT, enabling identification of specific bearing defect frequencies (BPFO, BPFI, BSF, FTF).'],
             ['🔮','L10 Bearing Life Prediction','ISO 281 L10 bearing life model adjusted for vibration amplitude, temperature, load factor (Kl) and speed factor (Ks). Health index 0–100 with condition badges.'],
             
-            ['⚡','Edge-to-Cloud Architecture','RUT200 industrial IoT router runs onboard Lua script → captures Balluff BNI data via MQTT → pushes to Railway cloud every 2s. Works on 4G/LTE rail network.'],
+            ['⚡','Edge-to-Cloud Architecture','Industrial 4G Gateway industrial IoT router runs onboard Lua script → captures Balluff BNI data via MQTT → pushes to Railway cloud every 2s. Works on 4G/LTE rail network.'],
             ['🚨','Smart Alarm Centre','Auto-generated alarms on threshold breach with acknowledgement workflow. Unacknowledged alarm counter in navigation badge. Historical alarm log with export.'],
             ['📧','Automated Email Reports','Scheduled daily/weekly PDF status reports auto-emailed to depot supervisors. Manual on-demand report generation also available.'],
             ['👥','Role-Based Access Control','Admin / Supervisor / Operator roles. Operators restricted to assigned locos. Supervisors see all. Full audit trail of config changes and alarm acknowledgements.'],
@@ -1520,7 +1498,7 @@ function showPage(name) {
     temperature:'Temperature',prediction:'Bearing Life',livedata:'Live Data Log',
     alarms:'Alarms',locos:'Manage Locos',users:'Manage Users',config:'Configuration',
     reports:'Reports',fleet:'Fleet Overview',email:'Email Reports',maintenance:'Maintenance Log',
-    odometer:'Travel Distance',usp:'About / USP'};
+    usp:'About / USP'};
   document.title = (titles[name]||name) + ' | LOCO TM CMS';
   document.querySelectorAll('.nav-item').forEach(n => {
     if (n.getAttribute('onclick')?.includes(`'${name}'`)) n.classList.add('active');
@@ -1551,7 +1529,7 @@ function showPage(name) {
   if (name === 'email') { loadEmailConfig(); populatePdfLoco(); }
   if (name === 'maintenance') loadMaintPage();
   if (name === 'reports') populateReportLoco();
-  if (name === 'odometer') loadOdometer();
+
   document.getElementById('sidebar').classList.remove('open');
 }
 
@@ -2293,59 +2271,8 @@ setInterval(checkScheduledExport, 3600000); // Every hour check
 // ═══════════════════════════════════════════════════════════════
 // TRAVEL DISTANCE / ODOMETER
 // ═══════════════════════════════════════════════════════════════
-async function loadOdometer() {
-  const grid = document.getElementById('odometerGrid');
-  if (!grid) return;
-  if (!locos.length) { grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;color:var(--text3);padding:30px;">No locomotives configured.</div>'; return; }
-  const results = await Promise.all(locos.map(l => api(`/api/locos/${l.id}/odometer`)));
-  const odometers = await Promise.all(results.map(r => r ? r.json() : null));
-  grid.innerHTML = locos.map((loco, i) => {
-    const odo = odometers[i] || {};
-    const km = odo.travelDistance || 0;
-    const updated = odo.lastOdometerUpdate ? new Date(odo.lastOdometerUpdate).toLocaleString('en-IN') : 'Never';
-    return `<div class="card">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
-        <div>
-          <div style="font-size:15px;font-weight:700;color:var(--navy)">Loco ${loco.locoNumber}</div>
-          <div style="font-size:11px;color:var(--text3)">${loco.name||''} &mdash; ${loco.depot||'–'}</div>
-        </div>
-        <span class="tm-badge ${loco.status==='online'?'badge-good':''}"> ${loco.status==='online'?'Online':'Offline'}</span>
-      </div>
-      <div style="text-align:center;padding:16px 0;">
-        <div style="font-size:38px;font-weight:800;font-family:var(--mono);color:var(--navy)">${km.toLocaleString()}</div>
-        <div style="font-size:13px;color:var(--text3);margin-top:4px;">kilometres run</div>
-        <div style="font-size:10px;color:var(--text4);margin-top:6px;">Last updated: ${updated}</div>
-      </div>
-      <div style="height:4px;background:var(--border);border-radius:2px;overflow:hidden;margin-bottom:14px;">
-        <div style="height:100%;width:${Math.min(100,(km/500000)*100)}%;background:var(--blue2);border-radius:2px;"></div>
-      </div>
-      <button class="btn btn-primary btn-sm" style="width:100%" onclick="openOdometerEdit('${loco.id}','${loco.locoNumber}',${km})">&#128344; Update Reading</button>
-    </div>`;
-  }).join('');
-}
 
-function openOdometerEdit(locoId, locoNumber, currentKm) {
-  document.getElementById('odo_locoId').value = locoId;
-  document.getElementById('odo_locoLabel').textContent = `Loco ${locoNumber} — Enter new total km reading`;
-  document.getElementById('odo_km').value = currentKm;
-  document.getElementById('odometerUpdateBox').style.display = 'block';
-  document.getElementById('odo_km').focus();
-}
 
-async function saveOdometer() {
-  const locoId = document.getElementById('odo_locoId').value;
-  const km = parseFloat(document.getElementById('odo_km').value);
-  if (!locoId || isNaN(km) || km < 0) { showToast('Enter a valid distance', 'error'); return; }
-  const r = await api(`/api/locos/${locoId}/odometer`, { method:'PUT', body: JSON.stringify({ travelDistance: km }) });
-  if (r?.ok) {
-    document.getElementById('odometerUpdateBox').style.display = 'none';
-    showToast('Odometer updated!', 'success');
-    loadOdometer();
-  } else {
-    const d = await r?.json();
-    showToast(d?.error || 'Error saving odometer', 'error');
-  }
-}
 
 // ═══════════════════════════════════════════════════════════════
 // FREQUENCY SPECTRUM (FFT) — added to Vibration Analysis page
