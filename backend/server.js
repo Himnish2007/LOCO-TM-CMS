@@ -660,75 +660,7 @@ app.put('/api/locos/:id/photo', auth, (req, res) => {
   saveDB(); res.json({ success: true });
 });
 
-// ════════════════════════════════════════════════════════════════
-// ODOMETER - GPS Distance Tracking
-// ════════════════════════════════════════════════════════════════
 
-// Ingest GPS data from RUT200
-app.post('/api/gps/ingest', (req, res) => {
-  const key = req.headers['x-api-key'];
-  if (key !== DATA_KEY) return res.status(401).json({ error: 'Invalid key' });
-  const { locoId, locoIp, lat, lon, speed, timestamp } = req.body;
-  if (!lat || !lon) return res.status(400).json({ error: 'lat/lon required' });
-
-  let loco = db.locos.find(l => l.id === locoId || l.ipAddress === locoIp);
-  if (!loco) return res.status(404).json({ error: 'Loco not found' });
-
-  if (!db.gpsLog) db.gpsLog = {};
-  if (!db.gpsLog[loco.id]) db.gpsLog[loco.id] = { totalKm: 0, lastLat: null, lastLon: null, history: [] };
-
-  const gps = db.gpsLog[loco.id];
-  const ts = timestamp || new Date().toISOString();
-
-  // Calculate distance from last point (Haversine formula)
-  if (gps.lastLat && gps.lastLon) {
-    const R = 6371; // Earth radius km
-    const dLat = (lat - gps.lastLat) * Math.PI / 180;
-    const dLon = (lon - gps.lastLon) * Math.PI / 180;
-    const a = Math.sin(dLat/2)**2 + Math.cos(gps.lastLat*Math.PI/180) * Math.cos(lat*Math.PI/180) * Math.sin(dLon/2)**2;
-    const dist = R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-    if (dist < 10) { // Max 10km per reading (filter GPS jumps)
-      gps.totalKm += dist;
-      loco.odometer = Math.round(gps.totalKm);
-    }
-  }
-
-  gps.lastLat = lat;
-  gps.lastLon = lon;
-  gps.history.push({ lat, lon, speed: speed||0, ts });
-  if (gps.history.length > 1440) gps.history.shift(); // Keep 24h
-
-  saveDB();
-  res.json({ success: true, totalKm: Math.round(gps.totalKm||0) });
-});
-
-// Get odometer for a loco
-app.get('/api/gps/:locoId', auth, (req, res) => {
-  const loco = db.locos.find(l => l.id === req.params.locoId);
-  if (!loco) return res.status(404).json({ error: 'Not found' });
-  const gps = db.gpsLog?.[req.params.locoId] || { totalKm: 0, history: [] };
-  res.json({
-    locoId: req.params.locoId,
-    locoNumber: loco.locoNumber,
-    totalKm: Math.round(gps.totalKm || loco.odometer || 0),
-    lastLocation: gps.history.slice(-1)[0] || null,
-    recentTrack: gps.history.slice(-60)
-  });
-});
-
-// Reset/set odometer manually
-app.put('/api/gps/:locoId/odometer', auth, (req, res) => {
-  if (req.user.role !== 'admin') return res.status(403).json({ error: 'Admin only' });
-  const loco = db.locos.find(l => l.id === req.params.locoId);
-  if (!loco) return res.status(404).json({ error: 'Not found' });
-  const km = parseFloat(req.body.km) || 0;
-  loco.odometer = km;
-  if (!db.gpsLog) db.gpsLog = {};
-  if (!db.gpsLog[loco.id]) db.gpsLog[loco.id] = { totalKm: 0, lastLat: null, lastLon: null, history: [] };
-  db.gpsLog[loco.id].totalKm = km;
-  saveDB();
-  res.json({ success: true, totalKm: km });
-});
 
 app.get('/health', (req, res) =>
   res.json({ status: 'ok', uptime: Math.round(process.uptime()), locos: db.locos.length }));
