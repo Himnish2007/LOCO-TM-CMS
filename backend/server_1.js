@@ -81,8 +81,7 @@ function loadDB() {
       logIntervalMinutes: 1,
       tempThresholds: { warning: 70, critical: 85 },
       vibThresholds: { warning: { rms: 5.0, peak: 10.0 }, critical: { rms: 8.0, peak: 15.0 } },
-      bearingLifeBase: 50000,
-      vibBaseline: 0.15
+      bearingLifeBase: 50000
     }
   };
 }
@@ -164,8 +163,8 @@ app.get('/api/locos', auth, (req, res) => {
   if (req.user.role === 'admin') return res.json(db.locos);
   const user = db.users.find(u => u.id === req.user.id);
   const assigned = user?.assignedLocos || [];
-  // Supervisor sees all, operator sees only assigned
-  if (req.user.role === 'supervisor' || assigned.length === 0) return res.json(db.locos);
+  // If no locos assigned, show all (useful for supervisors)
+  if (assigned.length === 0) return res.json(db.locos);
   res.json(db.locos.filter(l => assigned.includes(l.id)));
 });
 
@@ -220,8 +219,7 @@ app.post('/api/data/ingest', (req, res) => {
     if (!db.sensorReadings[loco.id][tm])
       db.sensorReadings[loco.id][tm] = { latest: null, history: [] };
     const d = tmData[tm];
-    // DISCONNECTED comes from Lua script (isValid:false from BNI)
-    // Only trust DISCONNECTED if explicitly set by Lua script
+    // If sensor disconnected (isValid:false from BNI), store as disconnected
     if (d.ioLinkStatus === 'DISCONNECTED') {
       db.sensorReadings[loco.id][tm].latest = { 
         ioLinkStatus: 'DISCONNECTED', timestamp: ts,
@@ -229,8 +227,6 @@ app.post('/api/data/ingest', (req, res) => {
       };
       return; // skip history + alarm for disconnected
     }
-    // Do NOT auto-detect disconnection from temp/vib values
-    // This was causing flickering on dashboard
     const r = { ...d, timestamp: ts };
     db.sensorReadings[loco.id][tm].latest = r;
     // Only store valid readings in history
@@ -324,10 +320,7 @@ app.get('/api/alarms', auth, (req, res) => {
   if (req.query.locoId) alarms = alarms.filter(a => a.locoId === req.query.locoId);
   if (req.user.role !== 'admin') {
     const user = db.users.find(u => u.id === req.user.id);
-    if (req.user.role === 'operator' && user?.assignedLocos?.length > 0) {
-      alarms = alarms.filter(a => user.assignedLocos.includes(a.locoId));
-    }
-    // supervisors see all alarms
+    alarms = alarms.filter(a => user?.assignedLocos?.includes(a.locoId));
   }
   res.json(alarms.slice(0, parseInt(req.query.limit) || 100));
 });
@@ -543,83 +536,6 @@ app.put('/api/email/config', auth, (req, res) => {
 });
 
 
-// ════════════════════════════════════════════════════════════════
-// MAINTENANCE LOG API
-// ════════════════════════════════════════════════════════════════
-app.get('/api/maintenance', auth, (req, res) => {
-  if(!db.maintenanceLogs) db.maintenanceLogs = [];
-  let logs = db.maintenanceLogs;
-  if(req.query.locoId) logs = logs.filter(l => l.locoId === req.query.locoId);
-  if(req.query.tm) logs = logs.filter(l => l.tm === req.query.tm);
-  res.json(logs.slice(0, parseInt(req.query.limit) || 200));
-});
-
-app.post('/api/maintenance', auth, (req, res) => {
-  if(!db.maintenanceLogs) db.maintenanceLogs = [];
-  const entry = {
-    id: 'maint_' + Date.now() + '_' + Math.random().toString(36).slice(2,6),
-    locoId: req.body.locoId,
-    locoNumber: req.body.locoNumber || '',
-    tm: req.body.tm,
-    type: req.body.type,
-    description: req.body.description,
-    doneBy: req.body.doneBy || req.user.name || req.user.username,
-    date: req.body.date || new Date().toISOString().split('T')[0],
-    nextDue: req.body.nextDue || '',
-    status: req.body.status || 'completed',
-    createdBy: req.user.username,
-    createdAt: new Date().toISOString()
-  };
-  if(!entry.locoId || !entry.tm || !entry.description)
-    return res.status(400).json({ error: 'locoId, tm, description required' });
-  db.maintenanceLogs.unshift(entry);
-  if(db.maintenanceLogs.length > 5000) db.maintenanceLogs = db.maintenanceLogs.slice(0,5000);
-  saveDB();
-  res.json(entry);
-});
-
-app.put('/api/maintenance/:id', auth, (req, res) => {
-  if(!db.maintenanceLogs) db.maintenanceLogs = [];
-  const idx = db.maintenanceLogs.findIndex(l => l.id === req.params.id);
-  if(idx < 0) return res.status(404).json({ error: 'Not found' });
-  Object.assign(db.maintenanceLogs[idx], req.body, { id: req.params.id });
-  saveDB();
-  res.json(db.maintenanceLogs[idx]);
-});
-
-app.delete('/api/maintenance/:id', auth, (req, res) => {
-  if(!db.maintenanceLogs) db.maintenanceLogs = [];
-  db.maintenanceLogs = db.maintenanceLogs.filter(l => l.id !== req.params.id);
-  saveDB();
-  res.json({ success: true });
-});
-
-// Maintenance CSV export
-app.get('/api/maintenance/export', auth, (req, res) => {
-  const csvHeader = 'Date,Loco,TM,Type,Description,Done By,Next Due,Status\n';
-  if(!db.maintenanceLogs) return res.send(csvHeader);
-  let csv = csvHeader;
-  db.maintenanceLogs.forEach(l => {
-    csv += `${l.date},${l.locoNumber||l.locoId},${l.tm},"${l.type}","${(l.description||'').replace(/"/g,"'")}",${l.doneBy},${l.nextDue||''},${l.status}
-`;
-  });
-  res.setHeader('Content-Type', 'text/csv');
-  res.setHeader('Content-Disposition', `attachment; filename="maintenance_log_${new Date().toISOString().slice(0,10)}.csv"`);
-  res.send(csv);
-});
-
-// Loco photo upload (base64)
-app.put('/api/locos/:id/photo', auth, (req, res) => {
-  if (req.user.role !== 'admin') return res.status(403).json({ error: 'Admin only' });
-  const loco = db.locos.find(l => l.id === req.params.id);
-  if (!loco) return res.status(404).json({ error: 'Not found' });
-  if (!req.body.photo) return res.status(400).json({ error: 'No photo data' });
-  // Store base64 photo (max 500KB)
-  if (req.body.photo.length > 700000) return res.status(400).json({ error: 'Photo too large (max 500KB)' });
-  loco.photo = req.body.photo;
-  saveDB(); res.json({ success: true });
-});
-
 app.get('/health', (req, res) =>
   res.json({ status: 'ok', uptime: Math.round(process.uptime()), locos: db.locos.length }));
 
@@ -653,8 +569,7 @@ function broadcast(locoId, tmData, timestamp) {
     // For operators/supervisors - send if assigned OR if no locos assigned (all access)
     const u = db.users.find(u => u.id === c.user.id);
     const assigned = u?.assignedLocos || [];
-    // Operator: only assigned locos | Supervisor: all locos
-    if (u?.role === 'supervisor' || assigned.length === 0 || assigned.includes(locoId)) ws.send(msg);
+    if (assigned.length === 0 || assigned.includes(locoId)) ws.send(msg);
   });
 }
 
@@ -744,19 +659,13 @@ if (process.env.DEMO_MODE === 'true') {
 // ════════════════════════════════════════════════════════════════
 // EMAIL REPORT FUNCTION
 // ════════════════════════════════════════════════════════════════
-// Send report to specific user for their assigned locos
-async function sendReportToUser(user, assignedLocoIds, type = 'scheduled') {
+async function sendReport(type = 'scheduled', toEmail = EMAIL_TO) {
   if (!nodemailer) throw new Error('nodemailer not installed');
   if (!EMAIL_USER || !EMAIL_PASS) throw new Error('Email not configured');
-  if (!user.email) throw new Error('No email for user: ' + user.username);
   const ts = new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' });
-  const userLocos = assignedLocoIds.length
-    ? db.locos.filter(l => assignedLocoIds.includes(l.id))
-    : db.locos; // admin gets all
-  if (!userLocos.length) return;
 
   let locoSummary = '';
-  userLocos.forEach(loco => {
+  db.locos.forEach(loco => {
     const readings = db.sensorReadings[loco.id] || {};
     let tmRows = '';
     for (let i = 1; i <= (loco.tmCount || 6); i++) {
@@ -784,15 +693,16 @@ async function sendReportToUser(user, assignedLocoIds, type = 'scheduled') {
   const html = `<!DOCTYPE html><html><body style="font-family:Calibri,Arial,sans-serif;margin:0;padding:0;background:#F0F4F8">
 <div style="max-width:700px;margin:20px auto;background:white;border-radius:12px;overflow:hidden;box-shadow:0 4px 6px rgba(0,0,0,0.1)">
   <div style="background:#1A365D;padding:24px 28px"><div style="font-size:20px;font-weight:700;color:white">LOCO TM CMS — ${type==='manual'?'Manual':'Scheduled'} Report</div>
-  <div style="font-size:12px;color:#AECEF0;margin-top:4px">For: ${user.name || user.username} | ${ts}</div></div>
+  <div style="font-size:12px;color:#AECEF0;margin-top:4px">Himnish Limited | ${ts}</div></div>
   <div style="background:#2A4A7F;padding:6px 28px;font-size:11px;color:#AECEF0">F-408, Aditya Corporate Hub, Ghaziabad | +91-9873909306 | www.himnishprojects.com</div>
   <div style="padding:24px 28px">
-    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px">
-      <div style="background:#F7FAFC;border:1px solid #E2E8F0;padding:12px;border-radius:6px;text-align:center"><div style="font-size:10px;color:#718096;font-weight:700;text-transform:uppercase">Assigned Locos</div><div style="font-size:24px;font-weight:700;color:#1A365D">${userLocos.length}</div></div>
-      <div style="background:#F7FAFC;border:1px solid #E2E8F0;padding:12px;border-radius:6px;text-align:center"><div style="font-size:10px;color:#718096;font-weight:700;text-transform:uppercase">Online</div><div style="font-size:24px;font-weight:700;color:#276749">${userLocos.filter(l=>l.status==='online').length}</div></div>
-      <div style="background:#F7FAFC;border:1px solid #E2E8F0;padding:12px;border-radius:6px;text-align:center"><div style="font-size:10px;color:#718096;font-weight:700;text-transform:uppercase">Active Alarms</div><div style="font-size:24px;font-weight:700;color:#9B2C2C">${(db.alarmLogs||[]).filter(a=>userLocos.some(l=>l.id===a.locoId)&&!a.acknowledged).length}</div></div>
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px">
+      <div style="background:#F7FAFC;border:1px solid #E2E8F0;padding:12px;border-radius:6px;text-align:center"><div style="font-size:10px;color:#718096;font-weight:700;text-transform:uppercase">Total Locos</div><div style="font-size:24px;font-weight:700;color:#1A365D">${db.locos.length}</div></div>
+      <div style="background:#F7FAFC;border:1px solid #E2E8F0;padding:12px;border-radius:6px;text-align:center"><div style="font-size:10px;color:#718096;font-weight:700;text-transform:uppercase">Online</div><div style="font-size:24px;font-weight:700;color:#276749">${db.locos.filter(l=>l.status==='online').length}</div></div>
+      <div style="background:#F7FAFC;border:1px solid #E2E8F0;padding:12px;border-radius:6px;text-align:center"><div style="font-size:10px;color:#718096;font-weight:700;text-transform:uppercase">Active Alarms</div><div style="font-size:24px;font-weight:700;color:#9B2C2C">${(db.alarmLogs||[]).filter(a=>!a.acknowledged).length}</div></div>
+      <div style="background:#F7FAFC;border:1px solid #E2E8F0;padding:12px;border-radius:6px;text-align:center"><div style="font-size:10px;color:#718096;font-weight:700;text-transform:uppercase">TMs Monitored</div><div style="font-size:24px;font-weight:700;color:#2B6CB0">${db.locos.reduce((s,l)=>s+(l.tmCount||6),0)}</div></div>
     </div>
-    <div style="font-size:13px;font-weight:700;color:#0BC5EA;letter-spacing:2px;text-transform:uppercase;margin-bottom:14px;border-bottom:2px solid #0BC5EA;padding-bottom:6px">YOUR LOCOMOTIVE STATUS</div>
+    <div style="font-size:13px;font-weight:700;color:#0BC5EA;letter-spacing:2px;text-transform:uppercase;margin-bottom:14px;border-bottom:2px solid #0BC5EA;padding-bottom:6px">LOCOMOTIVE STATUS</div>
     ${locoSummary}
     <div style="text-align:center;margin-top:16px"><a href="https://loco-tm-cms-production.up.railway.app" style="background:#1A365D;color:white;padding:12px 28px;border-radius:6px;text-decoration:none;font-weight:700;font-size:13px">Open Dashboard →</a></div>
   </div>
@@ -800,54 +710,23 @@ async function sendReportToUser(user, assignedLocoIds, type = 'scheduled') {
 </div></body></html>`;
 
   const transporter = nodemailer.createTransport({ service: 'gmail', auth: { user: EMAIL_USER, pass: EMAIL_PASS } });
+  const recipients = db.emailConfig?.recipients || toEmail;
   await transporter.sendMail({
     from: `"LOCO TM CMS" <${EMAIL_USER}>`,
-    to: user.email,
-    subject: `[LOCO TM CMS] ${type==='manual'?'Manual':'Scheduled'} Report — ${new Date().toLocaleDateString('en-IN')} — ${user.name || user.username}`,
+    to: recipients,
+    subject: `[LOCO TM CMS] ${type==='manual'?'Manual':'Scheduled'} Status Report — ${new Date().toLocaleDateString('en-IN')}`,
     html
   });
-  console.log('Email sent to:', user.email, 'for locos:', userLocos.map(l=>l.locoNumber).join(','));
-}
-
-// Legacy wrapper for manual/test email
-async function sendReport(type = 'scheduled', toEmail = EMAIL_TO) {
-  // Send to each user their respective locos
-  const usersWithEmail = db.users.filter(u => u.email);
-  if (!usersWithEmail.length) {
-    // Fallback: send all to EMAIL_TO
-    const adminUser = { email: toEmail, name: 'Admin', username: 'admin' };
-    await sendReportToUser(adminUser, [], type);
-    return;
-  }
-  for (const user of usersWithEmail) {
-    try {
-      const assignedLocos = user.role === 'admin' ? [] : (user.assignedLocos || []);
-      await sendReportToUser(user, assignedLocos, type);
-    } catch(e) {
-      console.error('Email error for', user.username, ':', e.message);
-    }
-  }
+  console.log('Email sent to:', recipients);
 }
 
 // ── EMAIL SCHEDULER ───────────────────────────────────────────────
 if (cron && EMAIL_USER && EMAIL_PASS) {
   cron.schedule(EMAIL_SCHED, async () => {
-    console.log('Running scheduled email reports...');
-    const usersWithEmail = db.users.filter(u => u.email && u.email.trim());
-    if (usersWithEmail.length) {
-      for (const user of usersWithEmail) {
-        try {
-          const assignedLocos = user.role === 'admin' ? [] : (user.assignedLocos || []);
-          await sendReportToUser(user, assignedLocos, 'scheduled');
-        } catch(e) { console.error('Scheduled email error for', user.username, ':', e.message); }
-      }
-    } else {
-      // Fallback to EMAIL_TO
-      try { await sendReport('scheduled', EMAIL_TO); }
-      catch(e) { console.error('Fallback email error:', e.message); }
-    }
+    try { const db=loadDB(); await sendReport('scheduled', db.emailConfig?.recipients || EMAIL_TO); }
+    catch(e) { console.error('Email error:', e.message); }
   }, { timezone: 'Asia/Kolkata' });
-  console.log('Email scheduler active:', EMAIL_SCHED, '— per-user mode');
+  console.log('Email scheduler active:', EMAIL_SCHED);
 }
 
 

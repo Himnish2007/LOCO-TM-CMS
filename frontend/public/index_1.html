@@ -24,31 +24,6 @@
   --radius:8px;--radius2:12px;
   --font:'Inter',sans-serif;--mono:'JetBrains Mono',monospace;
 }
-/* ── DARK MODE ─────────────────────────────────────────────────── */
-[data-theme="dark"]{
-  --bg:#0D1117;--bg2:#161B22;--bg3:#1C2128;--card:#161B22;
-  --border:#30363D;--border2:#484F58;
-  --blue-lt:#1C2A3A;--green-lt:#0D2818;--red-lt:#2D1515;--yellow-lt:#2D2010;
-  --green-bg:#144D25;--red-bg:#4A1515;--yellow-bg:#3D2B0A;
-  --text:#E6EDF3;--text2:#C9D1D9;--text3:#8B949E;--text4:#484F58;
-  --white:#161B22;
-  --shadow:0 1px 3px rgba(0,0,0,0.4);
-  --shadow2:0 4px 6px rgba(0,0,0,0.5);
-  --shadow3:0 10px 15px rgba(0,0,0,0.6);
-}
-[data-theme="dark"] .sidebar{background:#161B22 !important;}
-[data-theme="dark"] .topbar{background:#010409 !important;}
-[data-theme="dark"] .data-table th{background:#010409 !important;}
-[data-theme="dark"] .modal-header{background:#010409 !important;}
-[data-theme="dark"] .f-input,[data-theme="dark"] .f-select{background:#0D1117 !important;color:#E6EDF3;border-color:#30363D;}
-[data-theme="dark"] .login-box{background:#161B22 !important;}
-[data-theme="dark"] .login-header{background:linear-gradient(135deg,#010409,#161B22) !important;}
-[data-theme="dark"] .nav-item:hover{background:#1C2128 !important;}
-[data-theme="dark"] .nav-item.active{background:#1C2A3A !important;}
-[data-theme="dark"] .tmc,[data-theme="dark"] .card,[data-theme="dark"] .stat-box{background:#161B22 !important;border-color:#30363D !important;}
-[data-theme="dark"] .tm-m,[data-theme="dark"] .axis-box,[data-theme="dark"] .ov-tm{background:#0D1117 !important;border-color:#30363D !important;}
-[data-theme="dark"] .data-table tr:hover td{background:#1C2128 !important;}
-[data-theme="dark"] .data-table td{border-color:#30363D !important;}
 html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--font);font-size:14px;overflow-x:hidden;}
 ::-webkit-scrollbar{width:5px;height:5px;}
 ::-webkit-scrollbar-track{background:var(--bg);}
@@ -293,12 +268,6 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--f
 #toast.show{opacity:1;transform:translateY(0);}
 #toast.success{background:#276749;}
 #toast.error{background:#9B2C2C;}
-/* Health score badge */
-.health-score-badge{display:inline-flex;align-items:center;gap:6px;padding:4px 12px;border-radius:20px;font-size:12px;font-weight:700;}
-/* Sparkline */
-.sparkline-wrap{height:35px;margin:6px 0;}
-/* Loco photo */
-.loco-photo{width:48px;height:48px;border-radius:8px;object-fit:cover;border:2px solid var(--border);}
 
 /* RESPONSIVE */
 @media(max-width:1200px){.tm-grid{grid-template-columns:repeat(2,1fr);}.stat-row{grid-template-columns:repeat(3,1fr);}.detail-grid{grid-template-columns:1fr;}}
@@ -334,15 +303,8 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--f
     <div class="tb-logo">TM</div>
     <div><div class="tb-title">LOCO TM CONDITION MONITORING SYSTEM</div><div class="tb-sub">Himnish Limited &middot; Traction Motor Predictive Analytics</div></div>
     <div class="tb-live"><div class="tb-dot offline" id="wsDot"></div><span class="tb-live-txt" id="wsLabel">CONNECTING</span></div>
-    <select id="refreshInterval" onchange="setRefreshInterval(this.value)" style="background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);color:white;font-size:11px;padding:3px 6px;border-radius:6px;font-family:var(--font);" title="Auto-refresh interval">
-      <option value="2000">2s</option>
-      <option value="5000" selected>5s</option>
-      <option value="10000">10s</option>
-      <option value="30000">30s</option>
-    </select>
     <div class="tb-clock" id="clock">--:--:--</div>
     <div class="tb-user"><div class="tb-avatar" id="userAvatar">A</div><div><div class="tb-uname" id="userName">--</div><div class="tb-urole" id="userRole">--</div></div></div>
-    <button class="tb-logout" id="themeBtn" onclick="toggleTheme()" style="margin-right:6px;padding:6px 10px;" title="Toggle Dark/Light Mode">🌙</button>
     <button class="tb-logout" onclick="logout()">Logout</button>
   </div>
   <div style="background:#1e3a5f;border-bottom:1px solid rgba(255,255,255,0.1);padding:4px 20px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;font-size:11px;color:rgba(255,255,255,0.7);">
@@ -372,7 +334,6 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--f
       <div class="nav-section">Reports</div>
       <div class="nav-item" onclick="showPage('reports')"><span class="nav-icon">&#128202;</span> Generate Report</div>
       <div class="nav-item" onclick="showPage('fleet')"><span class="nav-icon">&#128642;</span> Fleet Overview</div>
-      <div class="nav-item" onclick="showPage('maintenance')"><span class="nav-icon">&#128295;</span> Maintenance Log</div>
       <div class="nav-item admin-only" onclick="showPage('email')"><span class="nav-icon">&#128231;</span> Email Reports</div>
     </div>
     <div class="content" id="mainContent">
@@ -483,30 +444,6 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--f
           <div class="card"><div class="card-title">Temperature Thresholds</div><div class="form-row"><div class="f-group"><label class="f-label">Warning (&#8451;)</label><input type="number" class="f-input" id="cfg_tempWarn" value="70"></div><div class="f-group"><label class="f-label">Critical (&#8451;)</label><input type="number" class="f-input" id="cfg_tempCrit" value="85"></div></div></div>
           <div class="card"><div class="card-title">Vibration Thresholds (RMS m/s&#178;)</div><div class="form-row"><div class="f-group"><label class="f-label">Warning RMS</label><input type="number" step="0.1" class="f-input" id="cfg_vibWarnRms" value="5.0"></div><div class="f-group"><label class="f-label">Critical RMS</label><input type="number" step="0.1" class="f-input" id="cfg_vibCritRms" value="8.0"></div></div><div class="form-row"><div class="f-group"><label class="f-label">Warning Peak</label><input type="number" step="0.1" class="f-input" id="cfg_vibWarnPeak" value="10.0"></div><div class="f-group"><label class="f-label">Critical Peak</label><input type="number" step="0.1" class="f-input" id="cfg_vibCritPeak" value="15.0"></div></div></div>
           <div class="card"><div class="card-title">Bearing Life Model</div><div class="f-group"><label class="f-label">Base Life (hours)</label><input type="number" class="f-input" id="cfg_bearingLife" value="50000"></div></div>
-          <div class="card"><div class="card-title">Vibration Baseline Filter</div>
-            <div class="f-group"><label class="f-label">Baseline / Noise Filter (m/s²)</label><input type="number" step="0.01" class="f-input" id="cfg_baseline" value="0.15" min="0" max="2"></div>
-            <div style="font-size:12px;color:var(--text3);margin-top:4px;">Vibrations below this value will be treated as 0 (ambient/table noise). Current: <span id="cfg_baseline_display" style="color:var(--blue);font-weight:700">0.15 m/s²</span></div>
-          </div>
-        </div>
-      </div>
-
-      <div class="page" id="page-maintenance">
-        <div class="page-header">
-          <div><div class="page-title">Maintenance <span>Log</span></div><div class="page-sub">Track maintenance history for each traction motor</div></div>
-          <div class="page-actions">
-            <button class="btn btn-success btn-sm" onclick="exportMaintenanceCSV()">⬇ Export CSV</button>
-            <button class="btn btn-primary" onclick="openMaintModal()">+ Add Entry</button>
-          </div>
-        </div>
-        <div class="loco-sel" id="maintLocoSel"></div>
-        <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;" id="maintTmSel"></div>
-        <div class="card" style="padding:0;overflow:hidden;">
-          <div style="overflow-x:auto;">
-            <table class="data-table">
-              <thead><tr><th>Date</th><th>TM</th><th>Type</th><th>Description</th><th>Done By</th><th>Next Due</th><th>Status</th><th>Del</th></tr></thead>
-              <tbody id="maintTableBody"><tr><td colspan="7" style="text-align:center;color:var(--text3);padding:30px;">No maintenance records. Add first entry.</td></tr></tbody>
-            </table>
-          </div>
         </div>
       </div>
 
@@ -590,14 +527,6 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--f
       <div class="form-row"><div class="f-group"><label class="f-label">Loco Number *</label><input class="f-input" id="loco_number" placeholder="e.g. 22001"></div><div class="f-group"><label class="f-label">Name</label><input class="f-input" id="loco_name" placeholder="WAP-7 Rajdhani Link"></div></div>
       <div class="form-row"><div class="f-group"><label class="f-label">IP Address *</label><input class="f-input" id="loco_ip" placeholder="192.168.x.x"></div><div class="f-group"><label class="f-label">Depot</label><input class="f-input" id="loco_depot" placeholder="LKO Depot"></div></div>
       <div class="form-row"><div class="f-group"><label class="f-label">Series</label><select class="f-select" id="loco_series"><option>WAP-7</option><option>WAP-5</option><option>WAG-9</option><option>WAG-12</option><option>WAM-4</option><option>Other</option></select></div><div class="f-group"><label class="f-label">TM Count</label><select class="f-select" id="loco_tmCount"><option value="6" selected>6 (Standard)</option><option value="4">4</option><option value="3">3</option></select></div></div>
-      <div class="f-group"><label class="f-label">Loco Photo (optional)</label>
-        <div style="display:flex;align-items:center;gap:10px;">
-          <img id="loco_photo_preview" src="" style="width:60px;height:60px;border-radius:8px;object-fit:cover;border:2px solid var(--border);display:none;">
-          <input type="file" id="loco_photo_input" accept="image/*" onchange="previewLocoPhoto(this)" style="display:none;">
-          <button type="button" class="btn btn-ghost btn-sm" onclick="document.getElementById('loco_photo_input').click()">📷 Upload Photo</button>
-          <span style="font-size:11px;color:var(--text3)">JPG/PNG, max 500KB</span>
-        </div>
-      </div>
     </div>
     <div class="modal-footer"><button class="btn btn-ghost" onclick="closeModal('locoModal')">Cancel</button><button class="btn btn-primary" onclick="saveLoco()">Save Locomotive</button></div>
   </div>
@@ -610,54 +539,10 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--f
       <input type="hidden" id="usr_id">
       <div class="form-row"><div class="f-group"><label class="f-label">Username *</label><input class="f-input" id="usr_username" placeholder="username"></div><div class="f-group"><label class="f-label">Full Name</label><input class="f-input" id="usr_name" placeholder="Full Name"></div></div>
       <div class="form-row"><div class="f-group"><label class="f-label">Password</label><input type="password" class="f-input" id="usr_password" placeholder="Leave blank to keep"></div><div class="f-group"><label class="f-label">Email</label><input class="f-input" id="usr_email" placeholder="email@example.com"></div></div>
-      <div class="f-group"><label class="f-label">Role</label><select class="f-select" id="usr_role">
-  <option value="operator">Operator (sees only assigned locos)</option>
-  <option value="supervisor">Supervisor (sees all locos, no admin)</option>
-  <option value="admin">Administrator (full access)</option>
-</select></div>
+      <div class="f-group"><label class="f-label">Role</label><select class="f-select" id="usr_role"><option value="operator">Operator</option><option value="supervisor">Supervisor</option><option value="admin">Administrator</option></select></div>
       <div class="f-group"><label class="f-label">Assign Locomotives</label><div class="loco-check-list" id="locoCheckList"></div></div>
     </div>
     <div class="modal-footer"><button class="btn btn-ghost" onclick="closeModal('userModal')">Cancel</button><button class="btn btn-primary" onclick="saveUser()">Save User</button></div>
-  </div>
-</div>
-
-<div class="modal-overlay" id="maintModal">
-  <div class="modal">
-    <div class="modal-header"><div class="modal-title">Add Maintenance Entry</div><button class="modal-close" onclick="closeModal('maintModal')">&#x2715;</button></div>
-    <div class="modal-body">
-      <div class="form-row">
-        <div class="f-group"><label class="f-label">Traction Motor</label>
-          <select class="f-select" id="maint_tm">
-            <option>TM1</option><option>TM2</option><option>TM3</option>
-            <option>TM4</option><option>TM5</option><option>TM6</option>
-          </select>
-        </div>
-        <div class="f-group"><label class="f-label">Maintenance Type</label>
-          <select class="f-select" id="maint_type">
-            <option>Routine Inspection</option><option>Bearing Replacement</option>
-            <option>Vibration Check</option><option>Temperature Check</option>
-            <option>Brush Replacement</option><option>Insulation Check</option>
-            <option>Oil/Grease Change</option><option>Emergency Repair</option><option>Other</option>
-          </select>
-        </div>
-      </div>
-      <div class="f-group"><label class="f-label">Description</label><textarea class="f-input" id="maint_desc" rows="3" placeholder="Describe the maintenance work done..." style="resize:vertical;"></textarea></div>
-      <div class="form-row">
-        <div class="f-group"><label class="f-label">Done By</label><input class="f-input" id="maint_by" placeholder="Technician name"></div>
-        <div class="f-group"><label class="f-label">Date</label><input type="date" class="f-input" id="maint_date"></div>
-      </div>
-      <div class="form-row">
-        <div class="f-group"><label class="f-label">Next Due Date</label><input type="date" class="f-input" id="maint_next"></div>
-        <div class="f-group"><label class="f-label">Status</label>
-          <select class="f-select" id="maint_status">
-            <option value="completed">Completed</option>
-            <option value="pending">Pending</option>
-            <option value="scheduled">Scheduled</option>
-          </select>
-        </div>
-      </div>
-    </div>
-    <div class="modal-footer"><button class="btn btn-ghost" onclick="closeModal('maintModal')">Cancel</button><button class="btn btn-primary" onclick="saveMaintEntry()">Save Entry</button></div>
   </div>
 </div>
 
@@ -715,18 +600,19 @@ function updateTmGrid() {
   const warnRms = config?.vibThresholds?.warning?.rms || 5;
   const critT = config?.tempThresholds?.critical || 85;
   const warnT = config?.tempThresholds?.warning || 70;
-  const BASELINE = config?.vibBaseline ?? 0.15; // From config settings
+  const BASELINE = 0.15; // Ignore vibrations below this (table/ambient noise)
 
   grid.innerHTML = Array.from({length:tmCount}, (_,i) => {
     const tm = `TM${i+1}`;
     const d = ld[tm];
 
-    // Sensor connected = ioLinkStatus OK (primary check from BNI isValid)
-    // Temp > 0.5 only as secondary sanity check to avoid flicker near threshold
+    // Sensor connected = ioLinkStatus OK + realistic data
+    // DISCONNECTED = isValid:false from BNI (sent by v13 lua script)
     const hasData = d != null;
     const sensorConnected = hasData && 
       d.ioLinkStatus === 'OK' &&
-      d.vib != null;  // Don't use temp threshold - causes flickering!
+      d.vib != null &&
+      d.temp != null && d.temp > 1.0;
 
     if (!hasData || !sensorConnected) {
       return `<div class="tmc ${selectedTmKey===tm?'selected':''}" onclick="selectTm('${tm}')">
@@ -784,7 +670,6 @@ function updateTmGrid() {
       </div>
       <div class="health-track"><div class="health-fill" style="width:${health}%;background:${hColor}"></div></div>
       <div class="health-row"><span class="health-label">Health</span><span class="health-val" style="color:${hColor}">${health}%</span></div>
-      <canvas id="spark_${tm}" width="192" height="30" style="width:100%;height:30px;margin-top:4px;opacity:0.8;"></canvas>
     </div>`;
   }).join('');
   // Detail panel
@@ -792,7 +677,7 @@ function updateTmGrid() {
   const detail = document.getElementById('tmDetailPanel'); if (!detail) return;
   if (!d) { detail.innerHTML = `<div class="card" style="grid-column:1/-1;text-align:center;color:var(--text3);padding:30px;">No data for ${selectedTmKey} yet</div>`; return; }
   // Apply baseline filter to detail panel too
-  const BL = config?.vibBaseline ?? 0.15;
+  const BL = 0.15;
   const fX = d.vib?.x != null && Math.abs(d.vib.x) > BL ? (Math.abs(d.vib.x)-BL).toFixed(4) : '0.0000';
   const fY = d.vib?.y != null && Math.abs(d.vib.y) > BL ? (Math.abs(d.vib.y)-BL).toFixed(4) : '0.0000';
   const fZ = d.vib?.z != null && Math.abs(d.vib.z) > BL ? (Math.abs(d.vib.z)-BL).toFixed(4) : '0.0000';
@@ -844,32 +729,16 @@ function refreshOverview() {
   const grid = document.getElementById('overviewLocoGrid'); if (!grid) return;
   grid.innerHTML = locos.map(l => {
     const ld = latestData[l.id]||{};
-    const loco_tmCount = l.tmCount || 6;
-    const tmKeys = Array.from({length:loco_tmCount}, (_,i) => 'TM'+(i+1));
-    const tms = tmKeys.map(tm => {
-      const d = ld[tm] || null;
-      if(!d || d.ioLinkStatus==='DISCONNECTED') return `<div class="ov-tm"><div class="ov-tm-key" style="color:var(--text3)">${tm}</div><div class="ov-tm-temp" style="color:var(--text4);font-size:11px">--</div><div class="ov-tm-vib" style="color:var(--text4)">NC</div></div>`;
-      const tc = d.temp>=(config?.tempThresholds?.critical||85)?'val-crit':d.temp>=(config?.tempThresholds?.warning||70)?'val-warn':'val-good';
-      const vc = d.vib?.rms>=(config?.vibThresholds?.critical?.rms||8)?'val-crit':d.vib?.rms>=(config?.vibThresholds?.warning?.rms||5)?'val-warn':'val-good';
+    const tms = Object.entries(ld).slice(0,6).map(([tm,d]) => {
+      const tc = d.temp>=(config.tempThresholds?.critical||85)?'val-crit':d.temp>=(config.tempThresholds?.warning||70)?'val-warn':'val-good';
+      const vc = d.vib?.rms>=(config.vibThresholds?.critical?.rms||8)?'val-crit':d.vib?.rms>=(config.vibThresholds?.warning?.rms||5)?'val-warn':'val-good';
       return `<div class="ov-tm"><div class="ov-tm-key">${tm}</div><div class="ov-tm-temp ${tc}">${d.temp!=null?d.temp.toFixed(1)+'°':'--'}</div><div class="ov-tm-vib ${vc}">${d.vib?.rms!=null?d.vib.rms.toFixed(3):'--'}</div></div>`;
     }).join('');
-    const health = calcLocoHealth(l.id);
-    const hColor = getHealthColor(health);
-    const hLabel = getHealthLabel(health);
     return `<div class="ov-card" onclick="selectLoco('${l.id}','dash');showPage('dashboard')">
       <div class="ov-card-header">
-        <div style="display:flex;align-items:center;gap:10px;">
-          ${l.photo?`<img src="${l.photo}" style="width:44px;height:44px;border-radius:8px;object-fit:cover;border:2px solid var(--border);">`:'<div style="width:44px;height:44px;background:var(--blue-lt);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:22px;">🚂</div>'}
-          <div><div class="ov-loco-num">${l.locoNumber} <span style="font-size:13px;color:var(--text3);font-weight:500">${l.series||''}</span></div><div class="ov-loco-name">${l.name||''} · ${l.depot||''}</div></div>
-        </div>
+        <div><div class="ov-loco-num">${l.locoNumber} <span style="font-size:13px;color:var(--text3);font-weight:500">${l.series||''}</span></div><div class="ov-loco-name">${l.name||''} · ${l.depot||''}</div></div>
         <span class="status-badge ${l.status==='online'?'status-online':'status-offline'}"><span class="status-dot"></span>${(l.status||'offline').toUpperCase()}</span>
       </div>
-      ${health!==null ? `<div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
-        <div style="flex:1;height:6px;background:var(--border);border-radius:3px;overflow:hidden;">
-          <div style="height:100%;width:${health}%;background:${hColor};border-radius:3px;transition:width 0.5s;"></div>
-        </div>
-        <span style="font-size:12px;font-weight:700;color:${hColor}">Health: ${health}% (${hLabel})</span>
-      </div>` : ''}
       <div class="ov-tm-grid">${tms||'<div style="color:var(--text3);font-size:12px;grid-column:1/-1;text-align:center;padding:10px;">No data yet</div>'}</div>
       <div style="font-size:11px;color:var(--text4);margin-top:10px;font-family:monospace">${l.ipAddress} · Last: ${l.lastSeen?new Date(l.lastSeen).toLocaleTimeString():'never'}</div>
     </div>`;
@@ -894,11 +763,7 @@ function renderLocoTable() {
   tbody.innerHTML = locos.map(l=>`
     <tr>
       <td><span class="status-badge ${l.status==='online'?'status-online':'status-offline'}"><span class="status-dot"></span>${(l.status||'offline').toUpperCase()}</span></td>
-      <td>
-        ${l.photo?`<img src="${l.photo}" style="width:32px;height:32px;border-radius:6px;object-fit:cover;border:1px solid var(--border);margin-right:6px;vertical-align:middle;">`:
-        '<span style="display:inline-block;width:32px;height:32px;background:var(--blue-lt);border-radius:6px;text-align:center;line-height:32px;font-size:14px;margin-right:6px;vertical-align:middle;">🚂</span>'}
-        <span style="font-family:monospace;font-weight:700;color:var(--blue)">${(l.locoNumber||'--').toString().replace(/[<>]/g,'')}</span>
-      </td>
+      <td style="font-family:monospace;font-weight:700;color:var(--blue)">${(l.locoNumber||'--').toString().replace(/[<>]/g,'')}</td>
       <td>${l.name||'--'}</td><td style="font-family:monospace">${l.ipAddress}</td>
       <td>${l.depot||'--'}</td><td>${l.series||'--'}</td>
       <td style="text-align:center">${l.tmCount||6}</td>
@@ -1152,18 +1017,12 @@ async function loadConfig() {
   document.getElementById('cfg_vibWarnPeak').value = config.vibThresholds.warning.peak;
   document.getElementById('cfg_vibCritPeak').value = config.vibThresholds.critical.peak;
   document.getElementById('cfg_bearingLife').value = config.bearingLifeBase;
-  const bl = config.vibBaseline ?? 0.15;
-  const blEl = document.getElementById('cfg_baseline');
-  if(blEl) blEl.value = bl;
-  const blDisp = document.getElementById('cfg_baseline_display');
-  if(blDisp) blDisp.textContent = bl + ' m/s²';
 }
 
 async function loadAlarms() {
   const r = await api('/api/alarms?limit=100');
   if (!r) return;
   alarms = await r.json();
-  checkAlarmSound();
   const unack = alarms.filter(a => !a.acknowledged).length;
   document.getElementById('alarmBadge').textContent = unack;
   document.getElementById('alarmBadge').style.display = unack > 0 ? 'inline' : 'none';
@@ -1212,10 +1071,6 @@ function handleSensorUpdate(locoId, tmData, timestamp) {
 
   // Update TM grid if on dashboard for this loco
   if (selectedLocoId === locoId) {
-    // Update sparkline data
-    Object.keys(tmData).forEach(tm => {
-      if(tmData[tm]?.vib?.rms != null) updateSparkline(locoId, tm, tmData[tm].vib.rms);
-    });
     updateTmGrid();
     // Update live log
     Object.keys(tmData).forEach(tm => {
@@ -1246,8 +1101,7 @@ function showPage(name) {
   // Update browser tab title
   const titles = {overview:'Overview',dashboard:'TM Dashboard',vibration:'Vibration Analysis',
     temperature:'Temperature',prediction:'Bearing Life',livedata:'Live Data Log',
-    alarms:'Alarms',locos:'Manage Locos',users:'Manage Users',config:'Configuration',
-    reports:'Reports',fleet:'Fleet Overview',email:'Email Reports',maintenance:'Maintenance Log'};
+    alarms:'Alarms',locos:'Manage Locos',users:'Manage Users',config:'Configuration',reports:'Reports'};
   document.title = (titles[name]||name) + ' | LOCO TM CMS';
   document.querySelectorAll('.nav-item').forEach(n => {
     if (n.getAttribute('onclick')?.includes(`'${name}'`)) n.classList.add('active');
@@ -1262,7 +1116,6 @@ function showPage(name) {
   }
   if (name === 'vibration') {
     if(!selectedLocoId && locos.length) { selectedLocoId = locos[0].id; }
-    selectedTmKey = 'TM1'; // Always start with TM1
     renderLocoSelectors(); renderVibTmSel(); loadVibData();
   }
   if (name === 'temperature') {
@@ -1274,11 +1127,6 @@ function showPage(name) {
     renderLocoSelectors(); loadPredictions();
   }
   if (name === 'livedata') { if(!selectedLocoId && locos.length) selectLoco(locos[0].id, 'live'); }
-  if (name === 'fleet') loadFleet();
-  if (name === 'email') { loadEmailConfig(); populatePdfLoco(); }
-  if (name === 'maintenance') loadMaintPage();
-  if (name === 'reports') populateReportLoco();
-  document.getElementById('sidebar').classList.remove('open');
 }
 
 // ========== OVERVIEW ==========
@@ -1368,8 +1216,8 @@ async function loadVibData() {
       }]
     },
     options: { responsive:true, animation:false, plugins:{legend:{labels:{color:'#4A5568',font:{family:'Inter',size:10}}}},
-      scales:{x:{ticks:{color:'#718096',maxTicksLimit:8,font:{family:'Inter',size:9}},grid:{color:'#EDF2F7'}},
-              y:{ticks:{color:'#718096',font:{family:'Inter',size:9}},grid:{color:'#EDF2F7'},title:{display:true,text:'m/s²',color:'#718096'}}} }
+      scales:{x:{ticks:{color:'#718096',maxTicksLimit:8,font:{family:'Inter',size:9}},grid:{color:'#0f3050'}},
+              y:{ticks:{color:'#718096',font:{family:'Inter',size:9}},grid:{color:'#0f3050'},title:{display:true,text:'m/s²',color:'#718096'}}} }
   });
 
   // Comparison chart
@@ -1384,8 +1232,8 @@ async function loadVibData() {
       ]
     },
     options:{responsive:true,animation:false,plugins:{legend:{labels:{color:'#4A5568',font:{family:'Inter',size:9}}}},
-      scales:{x:{ticks:{color:'#718096',maxTicksLimit:8,font:{family:'Inter',size:9}},grid:{color:'#EDF2F7'}},
-              y:{ticks:{color:'#718096',font:{family:'Inter',size:9}},grid:{color:'#EDF2F7'}}}}
+      scales:{x:{ticks:{color:'#718096',maxTicksLimit:8,font:{family:'Inter',size:9}},grid:{color:'#0f3050'}},
+              y:{ticks:{color:'#718096',font:{family:'Inter',size:9}},grid:{color:'#0f3050'}}}}
   });
 
   // Stats
@@ -1443,19 +1291,9 @@ async function loadTempData() {
   const ctx = document.getElementById('tempTrendChart')?.getContext('2d');
   if (ctx) charts.tempTrend = new Chart(ctx, {
     type:'line', data:{labels, datasets},
-    options:{responsive:true,animation:false,
-      plugins:{legend:{labels:{color:'#4A5568',font:{family:'Inter',size:10}}}},
-      scales:{
-        x:{ticks:{color:'#718096',maxTicksLimit:10,font:{family:'Inter',size:9}},grid:{color:'#EDF2F7'}},
-        y:{
-          min:0, max:150,
-          ticks:{color:'#718096',font:{family:'Inter',size:9},stepSize:25,
-            callback: function(v){return v+' C';}},
-          grid:{color:'#EDF2F7'},
-          title:{display:true,text:'Temperature (deg C)',color:'#718096',font:{size:11}}
-        }
-      }
-    }
+    options:{responsive:true,animation:false,plugins:{legend:{labels:{color:'#4A5568',font:{family:'Inter',size:10}}}},
+      scales:{x:{ticks:{color:'#718096',maxTicksLimit:10,font:{family:'Inter',size:9}},grid:{color:'#0f3050'}},
+              y:{ticks:{color:'#718096',font:{family:'Inter',size:9}},grid:{color:'#0f3050'},title:{display:true,text:'°C',color:'#718096'}}}}
   });
 
   // Temp gauges
@@ -1483,20 +1321,14 @@ function updateTempCharts() { if(document.getElementById('page-temperature').cla
 
 function exportLiveCSV() {
   if (!liveLogRows.length) { showToast('No data to export','error'); return; }
-  // Format: Date | Time | Loco | TM | VibX | VibY | VibZ | RMS | Peak | CrestFactor | Temperature
-  let csv = 'Date,Time,Loco,TM,VibX,VibY,VibZ,RMS,Peak,CrestFactor,Temperature\n';
+  let csv = 'Timestamp,Loco,TM,VibX,VibY,VibZ,RMS,Peak,CrestFactor,Temperature\n';
   liveLogRows.forEach(r => {
-    const dt = new Date(r.timestamp);
-    const date = dt.toLocaleDateString('en-IN').replace(/\//g,'/');
-    const time = dt.toLocaleTimeString('en-IN', {hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:false});
-    csv += `${date},${time},${r.loco||''},${r.tm},${r.vib?.x!=null?r.vib.x.toFixed(4):''},${r.vib?.y!=null?r.vib.y.toFixed(4):''},${r.vib?.z!=null?r.vib.z.toFixed(4):''},${r.vib?.rms!=null?r.vib.rms.toFixed(4):''},${r.vib?.peak!=null?r.vib.peak.toFixed(4):''},${r.vib?.crestFactor!=null?r.vib.crestFactor.toFixed(2):''},${r.temp!=null?r.temp.toFixed(1):''}\n`;
+    csv += `${r.timestamp},${r.loco||''},${r.tm},${r.vib?.x||''},${r.vib?.y||''},${r.vib?.z||''},${r.vib?.rms||''},${r.vib?.peak||''},${r.vib?.crestFactor||''},${r.temp||''}\n`;
   });
-  const loco = locos.find(l=>l.id===selectedLocoId);
-  const fname = `LOCO_${loco?.locoNumber||'ALL'}_${new Date().toISOString().slice(0,10)}.csv`;
   const blob = new Blob([csv], {type:'text/csv'});
   const a = document.createElement('a'); a.href=URL.createObjectURL(blob);
-  a.download = fname; a.click();
-  showToast('CSV exported: '+fname,'success');
+  a.download='loco_tm_live_data.csv'; a.click();
+  showToast('CSV exported!','success');
 }
 
 function clearLiveLog() { liveLogRows=[]; renderLiveLogTable(); }
@@ -1518,19 +1350,6 @@ function openLocoModal(editId) {
     if(l){ document.getElementById('loco_number').value=l.locoNumber||''; document.getElementById('loco_name').value=l.name||''; document.getElementById('loco_ip').value=l.ipAddress; document.getElementById('loco_depot').value=l.depot||''; document.getElementById('loco_series').value=l.series||'WAP-7'; document.getElementById('loco_tmCount').value=l.tmCount||6; }
   } else { ['loco_number','loco_name','loco_ip','loco_depot'].forEach(id=>document.getElementById(id).value=''); }
   document.getElementById('locoModal').classList.add('show');
-}
-
-function previewLocoPhoto(input) {
-  if(!input.files?.[0]) return;
-  const file = input.files[0];
-  if(file.size > 500000) { showToast('Photo too large! Max 500KB', 'error'); return; }
-  const reader = new FileReader();
-  reader.onload = e => {
-    const preview = document.getElementById('loco_photo_preview');
-    preview.src = e.target.result;
-    preview.style.display = 'block';
-  };
-  reader.readAsDataURL(file);
 }
 
 async function saveLoco() {
@@ -1731,287 +1550,6 @@ async function sendManualEmail() {
   if(r.ok) showToast('✅ Email report sent!', 'success');
   else showToast('❌ ' + (d.error || 'Failed'), 'error');
 }
-
-
-
-// ════════════════════════════════════════════════════════════════
-// FEATURE 1: DARK/LIGHT MODE TOGGLE
-// ════════════════════════════════════════════════════════════════
-let isDark = localStorage.getItem('tm_theme') === 'dark';
-function applyTheme() {
-  document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light');
-  const btn = document.getElementById('themeBtn');
-  if(btn) btn.textContent = isDark ? '☀️' : '🌙';
-}
-function toggleTheme() {
-  isDark = !isDark;
-  localStorage.setItem('tm_theme', isDark ? 'dark' : 'light');
-  applyTheme();
-}
-// Apply saved theme on load
-applyTheme();
-
-// ════════════════════════════════════════════════════════════════
-// FEATURE 2: AUTO-REFRESH INTERVAL
-// ════════════════════════════════════════════════════════════════
-let refreshIntervalMs = 5000;
-let overviewRefreshTimer = null;
-
-function setRefreshInterval(ms) {
-  refreshIntervalMs = parseInt(ms);
-  // Clear existing interval
-  if(overviewInterval) clearInterval(overviewInterval);
-  if(overviewRefreshTimer) clearInterval(overviewRefreshTimer);
-  // Set new interval
-  overviewInterval = setInterval(refreshOverview, refreshIntervalMs);
-  overviewRefreshTimer = overviewInterval;
-  showToast('Refresh: ' + (refreshIntervalMs/1000) + 's', 'success');
-}
-
-// ════════════════════════════════════════════════════════════════
-// FEATURE 3: ALARM SOUND NOTIFICATION
-// ════════════════════════════════════════════════════════════════
-let alarmSoundEnabled = localStorage.getItem('tm_alarm_sound') !== 'false';
-let lastAlarmCount = 0;
-
-function playAlarmSound(type = 'critical') {
-  if(!alarmSoundEnabled) return;
-  try {
-    const ctx = new (window.AudioContext || window.webkitAudioContext)();
-    const oscillator = ctx.createOscillator();
-    const gainNode = ctx.createGain();
-    oscillator.connect(gainNode);
-    gainNode.connect(ctx.destination);
-    oscillator.type = 'square';
-    oscillator.frequency.setValueAtTime(type === 'critical' ? 880 : 440, ctx.currentTime);
-    gainNode.gain.setValueAtTime(0.3, ctx.currentTime);
-    gainNode.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.5);
-    oscillator.start(ctx.currentTime);
-    oscillator.stop(ctx.currentTime + 0.5);
-    if(type === 'critical') {
-      setTimeout(() => {
-        const o2 = ctx.createOscillator();
-        const g2 = ctx.createGain();
-        o2.connect(g2); g2.connect(ctx.destination);
-        o2.frequency.value = 660; g2.gain.setValueAtTime(0.3, ctx.currentTime);
-        g2.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.5);
-        o2.start(); o2.stop(ctx.currentTime + 0.5);
-      }, 600);
-    }
-  } catch(e) {}
-}
-
-// Check for new alarms and play sound
-function checkAlarmSound() {
-  const unack = alarms.filter(a => !a.acknowledged).length;
-  if(unack > lastAlarmCount) {
-    const newAlarms = alarms.slice(0, unack - lastAlarmCount);
-    const hasCritical = newAlarms.some(a => a.type?.includes('CRITICAL'));
-    playAlarmSound(hasCritical ? 'critical' : 'warning');
-    if(hasCritical) {
-      showToast('🚨 CRITICAL ALARM! Check Alarm Centre', 'error');
-    }
-  }
-  lastAlarmCount = unack;
-}
-
-// ════════════════════════════════════════════════════════════════
-// FEATURE 4: OVERALL LOCO HEALTH SCORE
-// ════════════════════════════════════════════════════════════════
-function calcLocoHealth(locoId) {
-  const ld = latestData[locoId] || {};
-  const tms = Object.values(ld).filter(d => d && d.ioLinkStatus === 'OK');
-  if(!tms.length) return null;
-  const critRms = config?.vibThresholds?.critical?.rms || 8;
-  const critT = config?.tempThresholds?.critical || 85;
-  let totalHealth = 0;
-  tms.forEach(d => {
-    const vibH = d.vib?.rms ? Math.max(0, 100 - (d.vib.rms / critRms * 100)) : 100;
-    const tempH = d.temp ? Math.max(0, 100 - ((d.temp - 30) / (critT - 30) * 100)) : 100;
-    totalHealth += (vibH + tempH) / 2;
-  });
-  return Math.round(totalHealth / tms.length);
-}
-
-function getHealthColor(score) {
-  if(score === null) return '#A0AEC0';
-  if(score >= 80) return '#48BB78';
-  if(score >= 60) return '#F6AD55';
-  return '#FC8181';
-}
-
-function getHealthLabel(score) {
-  if(score === null) return 'N/A';
-  if(score >= 80) return 'Good';
-  if(score >= 60) return 'Fair';
-  if(score >= 40) return 'Poor';
-  return 'Critical';
-}
-
-// ════════════════════════════════════════════════════════════════
-// FEATURE 5: SPARKLINE CHART ON TM CARD
-// ════════════════════════════════════════════════════════════════
-const sparklineData = {}; // Store recent values per TM
-
-function updateSparkline(locoId, tm, rmsValue) {
-  const key = locoId + '_' + tm;
-  if(!sparklineData[key]) sparklineData[key] = [];
-  sparklineData[key].push(rmsValue);
-  if(sparklineData[key].length > 20) sparklineData[key].shift();
-}
-
-function drawSparkline(canvasId, data, color) {
-  const canvas = document.getElementById(canvasId);
-  if(!canvas || !data || data.length < 2) return;
-  const ctx = canvas.getContext('2d');
-  const w = canvas.width, h = canvas.height;
-  ctx.clearRect(0,0,w,h);
-  const max = Math.max(...data, 0.1);
-  const min = Math.min(...data);
-  ctx.beginPath();
-  ctx.strokeStyle = color || '#3182CE';
-  ctx.lineWidth = 1.5;
-  ctx.lineJoin = 'round';
-  data.forEach((v, i) => {
-    const x = (i / (data.length-1)) * w;
-    const y = h - ((v - min) / (max - min || 1)) * h * 0.8 - h*0.1;
-    i === 0 ? ctx.moveTo(x,y) : ctx.lineTo(x,y);
-  });
-  ctx.stroke();
-}
-
-// ════════════════════════════════════════════════════════════════
-// FEATURE 6: MAINTENANCE LOG
-// ════════════════════════════════════════════════════════════════
-// Maintenance logs loaded from server
-
-function openMaintModal() {
-  document.getElementById('maint_date').value = new Date().toISOString().split('T')[0];
-  document.getElementById('maint_desc').value = '';
-  document.getElementById('maint_by').value = currentUser?.name || '';
-  document.getElementById('maintModal').classList.add('show');
-}
-
-async function saveMaintEntry() {
-  const loco = locos.find(l=>l.id===selectedLocoId);
-  const entry = {
-    locoId: selectedLocoId || '',
-    locoNumber: loco?.locoNumber || '--',
-    tm: document.getElementById('maint_tm').value,
-    type: document.getElementById('maint_type').value,
-    description: document.getElementById('maint_desc').value,
-    doneBy: document.getElementById('maint_by').value,
-    date: document.getElementById('maint_date').value,
-    nextDue: document.getElementById('maint_next').value,
-    status: document.getElementById('maint_status').value,
-  };
-  if(!entry.description) { showToast('Enter description', 'error'); return; }
-  if(!entry.locoId) { showToast('Select a locomotive first', 'error'); return; }
-  const r = await api('/api/maintenance', { method:'POST', body: JSON.stringify(entry) });
-  if(!r) { showToast('Connection error', 'error'); return; }
-  if(r.ok) {
-    closeModal('maintModal');
-    await loadMaintLogs();
-    showToast('✅ Maintenance entry saved online!', 'success');
-  } else {
-    const d = await r.json();
-    showToast('Error: ' + (d.error || 'Failed'), 'error');
-  }
-}
-
-let maintenanceLogs = [];
-
-async function loadMaintLogs() {
-  const locoFilter = selectedLocoId ? `?locoId=${selectedLocoId}` : '';
-  const r = await api('/api/maintenance' + locoFilter);
-  if(!r) return;
-  maintenanceLogs = await r.json();
-  renderMaintTable();
-}
-
-function renderMaintTable() {
-  const tbody = document.getElementById('maintTableBody'); if(!tbody) return;
-  if(!maintenanceLogs.length) {
-    tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:var(--text3);padding:30px;"><div style="font-size:24px;margin-bottom:8px;">🔧</div>No maintenance records yet. Add first entry!</td></tr>';
-    return;
-  }
-  tbody.innerHTML = maintenanceLogs.map(l => {
-    const sc = l.status === 'completed' ? '#276749' : l.status === 'pending' ? '#9B2C2C' : '#D69E2E';
-    const overdue = l.nextDue && new Date(l.nextDue) < new Date() && l.status !== 'completed';
-    return `<tr${overdue?' style="background:#FFF5F5"':''}>
-      <td style="font-family:monospace;font-size:12px">${l.date || '--'}</td>
-      <td><span style="background:var(--blue-lt);color:var(--blue);padding:2px 8px;border-radius:8px;font-size:11px;font-weight:700">${l.tm}</span></td>
-      <td style="font-size:13px">${l.type}</td>
-      <td style="font-size:12px;color:var(--text2);max-width:200px">${l.description}</td>
-      <td style="font-size:12px">${l.doneBy || '--'}</td>
-      <td style="font-size:12px;color:${overdue?'#9B2C2C':'inherit'}${overdue?';font-weight:700':''}">
-        ${l.nextDue || '--'}${overdue?' ⚠️':''}
-      </td>
-      <td><span style="background:${sc};color:white;padding:2px 8px;border-radius:8px;font-size:11px;font-weight:700;text-transform:uppercase">${l.status}</span></td>
-      <td>
-        <button class="btn btn-danger btn-sm" onclick="deleteMaintEntry('${l.id}')">✕</button>
-      </td>
-    </tr>`;
-  }).join('');
-}
-
-async function deleteMaintEntry(id) {
-  const r = await api('/api/maintenance/'+id, {method:'DELETE'});
-  if(r?.ok) { await loadMaintLogs(); showToast('Deleted', 'success'); }
-}
-
-async function exportMaintenanceCSV() {
-  window.open(API + '/api/maintenance/export?_auth=' + token, '_blank');
-  showToast('Maintenance CSV downloading!', 'success');
-}
-
-function loadMaintPage() {
-  const sel = document.getElementById('maintLocoSel');
-  if(sel) {
-    sel.innerHTML = [
-      `<div class="loco-chip ${!selectedLocoId?'active':''}" onclick="document.querySelectorAll('#maintLocoSel .loco-chip').forEach(e=>e.classList.remove('active'));this.classList.add('active');selectedLocoId=null;loadMaintLogs()">All</div>`,
-      ...locos.map(l => `<div class="loco-chip ${selectedLocoId===l.id?'active':''}" onclick="document.querySelectorAll('#maintLocoSel .loco-chip').forEach(e=>e.classList.remove('active'));this.classList.add('active');selectedLocoId='${l.id}';loadMaintLogs()">${l.locoNumber}</div>`)
-    ].join('');
-  }
-  loadMaintLogs();
-}
-
-// ════════════════════════════════════════════════════════════════
-// FEATURE 7: SCHEDULED CSV AUTO-DOWNLOAD (every 24 hours)
-// ════════════════════════════════════════════════════════════════
-function checkScheduledExport() {
-  if(!token || !locos.length) return;
-  const lastExport = localStorage.getItem('tm_last_export_date');
-  const today = new Date().toDateString();
-  if(lastExport === today) return; // Already exported today
-  
-  // Only auto-export if we have significant data
-  const loco = locos[0];
-  if(!loco) return;
-  
-  // Download CSV report for all locos
-  const from = new Date(Date.now() - 86400000).toISOString();
-  const to = new Date().toISOString();
-  locos.forEach(l => {
-    const url = `${API}/api/report/${l.id}?format=csv&from=${from}&to=${to}&_auth=${token}`;
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `LOCO_${l.locoNumber}_${new Date().toISOString().slice(0,10)}.csv`;
-    a.style.display = 'none';
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-  });
-  
-  localStorage.setItem('tm_last_export_date', today);
-  showToast('📥 Daily CSV auto-downloaded!', 'success');
-}
-
-// Check at startup and every hour
-setTimeout(checkScheduledExport, 30000); // 30s after login
-setInterval(checkScheduledExport, 3600000); // Every hour check
-
-// Alarm sound check called from loadAlarms
 
 
 document.addEventListener('keydown', function(e) {
