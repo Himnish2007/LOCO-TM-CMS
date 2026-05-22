@@ -227,9 +227,10 @@ app.post('/api/data/ingest', (req, res) => {
         ioLinkStatus: 'DISCONNECTED', timestamp: ts,
         temp: null, vib: null
       };
-      // Broadcast DISCONNECTED so frontend clears immediately
-      return;
+      return; // skip history + alarm for disconnected
     }
+    // Do NOT auto-detect disconnection from temp/vib values
+    // This was causing flickering on dashboard
     const r = { ...d, timestamp: ts };
     db.sensorReadings[loco.id][tm].latest = r;
     // Only store valid readings in history

@@ -19,6 +19,7 @@ local API_KEY  = "himnish_data_key_2024"
 local LOCO_IP  = "192.168.1.1"
 local SERIAL   = "HU00945596900021"
 local INTERVAL = 2
+local SENSOR_TIMEOUT = 15 -- seconds without data = sensor disconnected
 
 local PORT_MAP = {
   ["master1port1"]="TM1",["master1port2"]="TM2",["master1port3"]="TM3",
@@ -106,7 +107,7 @@ local function push(tm_data)
   end
 end
 
-local function process_buffer(buf, tm_data)
+local function process_buffer(buf, tm_data, last_seen)
   local pos=1
   while true do
     local js=buf:find('{"timestamp"',pos,true)
@@ -120,6 +121,7 @@ local function process_buffer(buf, tm_data)
         local sensor,reason=parse_sensor(chunk)
         if sensor then
           tm_data[tm]=sensor
+          last_seen[tm]=os.time()
           io.write(tm.."("..sensor.temp.."C "..sensor.vib.rms..") "); io.flush()
         elseif reason=="disconnected" then
           tm_data[tm]={vib={x=0,y=0,z=0,rms=0,peak=0,crestFactor=0,freq=0},temp=0,ioLinkStatus="DISCONNECTED"}
@@ -136,6 +138,7 @@ end
 print("LOCO TM CMS v14.0 | Himnish Limited")
 print("Server: "..RAILWAY)
 local tm_data={} local last_push=os.time() local buf_acc=""
+local last_seen={} -- track last valid data time per TM
 
 while true do
   local c=mqtt_connect()
@@ -153,7 +156,7 @@ while true do
       local chunk,err=c:receive(1024)
       if chunk then
         buf_acc=buf_acc..chunk
-        process_buffer(buf_acc,tm_data)
+        process_buffer(buf_acc,tm_data,last_seen)
         if #buf_acc>4000 then buf_acc=buf_acc:sub(-2000) end
       elseif err~="timeout" then
         print("\nDisconnected:"..tostring(err))
@@ -162,6 +165,15 @@ while true do
         socket.sleep(3); break
       end
       local now=os.time()
+      -- Timeout check: if sensor was seen but stopped sending, mark DISCONNECTED
+      for port,tm in pairs(PORT_MAP) do
+        if last_seen[tm] ~= nil and (now - last_seen[tm]) > SENSOR_TIMEOUT then
+          tm_data[tm]={vib={x=0,y=0,z=0,rms=0,peak=0,crestFactor=0,freq=0},
+                       temp=0,ioLinkStatus="DISCONNECTED"}
+          last_seen[tm]=nil
+          io.write(tm.."[TO] "); io.flush()
+        end
+      end
       if now-last_push>=INTERVAL and next(tm_data) then
         push(tm_data); last_push=now
       end

@@ -721,10 +721,12 @@ function updateTmGrid() {
     const tm = `TM${i+1}`;
     const d = ld[tm];
 
-    // Sensor connected ONLY if ioLinkStatus is OK
-    // DISCONNECTED or null = show NO SENSOR, never show old data
+    // Sensor connected = ioLinkStatus OK (primary check from BNI isValid)
+    // Temp > 0.5 only as secondary sanity check to avoid flicker near threshold
     const hasData = d != null;
-    const sensorConnected = hasData && d.ioLinkStatus === 'OK' && d.vib != null;
+    const sensorConnected = hasData && 
+      d.ioLinkStatus === 'OK' &&
+      d.vib != null;  // Don't use temp threshold - causes flickering!
 
     if (!hasData || !sensorConnected) {
       return `<div class="tmc ${selectedTmKey===tm?'selected':''}" onclick="selectTm('${tm}')">
@@ -1200,15 +1202,7 @@ function handleSensorUpdate(locoId, tmData, timestamp) {
     if (!locos.find(l => l.id === id)) delete latestData[id];
   });
   if (!latestData[locoId]) latestData[locoId] = {};
-  Object.keys(tmData).forEach(tm => {
-    const d = tmData[tm];
-    if (d && d.ioLinkStatus === 'DISCONNECTED') {
-      // Sensor removed - clear data immediately, show NO SENSOR
-      latestData[locoId][tm] = { ioLinkStatus: 'DISCONNECTED', timestamp, temp: null, vib: null };
-    } else {
-      latestData[locoId][tm] = { ...d, timestamp };
-    }
-  });
+  Object.keys(tmData).forEach(tm => { latestData[locoId][tm] = { ...tmData[tm], timestamp }; });
 
   const loco = locos.find(l => l.id === locoId);
   if (!loco) return;
