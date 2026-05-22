@@ -373,9 +373,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--f
       <div class="nav-item" onclick="showPage('reports')"><span class="nav-icon">&#128202;</span> Generate Report</div>
       <div class="nav-item" onclick="showPage('fleet')"><span class="nav-icon">&#128642;</span> Fleet Overview</div>
       <div class="nav-item" onclick="showPage('maintenance')"><span class="nav-icon">&#128295;</span> Maintenance Log</div>
-      <div class="nav-item" onclick="showPage('odometer')"><span class="nav-icon">&#128344;</span> Travel Distance</div>
       <div class="nav-item admin-only" onclick="showPage('email')"><span class="nav-icon">&#128231;</span> Email Reports</div>
-      <div class="nav-item" onclick="showPage('usp')"><span class="nav-icon">&#11088;</span> About / USP</div>
     </div>
     <div class="content" id="mainContent">
 
@@ -415,14 +413,6 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--f
           <div class="card"><div class="card-title">All Axes Comparison</div><canvas id="vibCompChart" height="160"></canvas></div>
         </div>
         <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;" id="vibStatsPanel"></div>
-        <!-- Frequency Spectrum Section -->
-        <div class="card" style="margin-top:14px;">
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
-            <div class="card-title" style="margin:0">Frequency Spectrum (FFT) <span style="font-size:11px;font-weight:400;color:var(--text3);">RMS vibration → frequency domain</span></div>
-            <button class="btn btn-ghost btn-sm" onclick="loadFrequencySpectrum()">&#9654; Run FFT Analysis</button>
-          </div>
-          <div id="freqSpecPanel" style="color:var(--text3);font-size:13px;padding:20px;text-align:center;">Click "Run FFT Analysis" to compute frequency spectrum for selected TM.</div>
-        </div>
       </div>
 
       <div class="page" id="page-temperature">
@@ -492,7 +482,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--f
           <div class="card"><div class="card-title">Data Logging</div><div class="f-group"><label class="f-label">Log Interval (min)</label><input type="number" class="f-input" id="cfg_logInterval" value="1" min="1" max="60"></div></div>
           <div class="card"><div class="card-title">Temperature Thresholds</div><div class="form-row"><div class="f-group"><label class="f-label">Warning (&#8451;)</label><input type="number" class="f-input" id="cfg_tempWarn" value="70"></div><div class="f-group"><label class="f-label">Critical (&#8451;)</label><input type="number" class="f-input" id="cfg_tempCrit" value="85"></div></div></div>
           <div class="card"><div class="card-title">Vibration Thresholds (RMS m/s&#178;)</div><div class="form-row"><div class="f-group"><label class="f-label">Warning RMS</label><input type="number" step="0.1" class="f-input" id="cfg_vibWarnRms" value="5.0"></div><div class="f-group"><label class="f-label">Critical RMS</label><input type="number" step="0.1" class="f-input" id="cfg_vibCritRms" value="8.0"></div></div><div class="form-row"><div class="f-group"><label class="f-label">Warning Peak</label><input type="number" step="0.1" class="f-input" id="cfg_vibWarnPeak" value="10.0"></div><div class="f-group"><label class="f-label">Critical Peak</label><input type="number" step="0.1" class="f-input" id="cfg_vibCritPeak" value="15.0"></div></div></div>
-          <div class="card"><div class="card-title">Bearing Life Model</div><div class="f-group"><label class="f-label">Base Life (hours)</label><input type="number" class="f-input" id="cfg_bearingLife" value="50000"></div><div class="f-group"><label class="f-label">Load Adjustment Factor (Kl)</label><input type="number" step="0.01" class="f-input" id="cfg_bearingLoad" value="1.0" min="0.1" max="3.0"><div style="font-size:11px;color:var(--text3);margin-top:3px;">1.0 = nominal. &lt;1 = heavy load (shorter life). Use 0.5–2.0 range.</div></div><div class="f-group"><label class="f-label">Speed Adjustment Factor (Ks)</label><input type="number" step="0.01" class="f-input" id="cfg_bearingSpeed" value="1.0" min="0.1" max="3.0"><div style="font-size:11px;color:var(--text3);margin-top:3px;">1.0 = nominal. &lt;1 = high speed (shorter life). Use 0.5–2.0 range.</div></div></div>
+          <div class="card"><div class="card-title">Bearing Life Model</div><div class="f-group"><label class="f-label">Base Life (hours)</label><input type="number" class="f-input" id="cfg_bearingLife" value="50000"></div></div>
           <div class="card"><div class="card-title">Vibration Baseline Filter</div>
             <div class="f-group"><label class="f-label">Baseline / Noise Filter (m/s²)</label><input type="number" step="0.01" class="f-input" id="cfg_baseline" value="0.15" min="0" max="2"></div>
             <div style="font-size:12px;color:var(--text3);margin-top:4px;">Vibrations below this value will be treated as 0 (ambient/table noise). Current: <span id="cfg_baseline_display" style="color:var(--blue);font-weight:700">0.15 m/s²</span></div>
@@ -585,69 +575,6 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--f
             <button class="btn btn-primary" onclick="generateReport()" style="width:100%">&#11015; Download Report</button>
           </div>
           <div class="card"><div class="card-title">Information</div><div style="font-size:13px;color:var(--text2);line-height:2.2;"><div>&#x2022; CSV includes all 6 TM vibration &amp; temperature</div><div>&#x2022; JSON includes full metadata</div><div>&#x2022; Data stored up to 7 days</div><div>&#x2022; Reports generated in real-time</div></div></div>
-        </div>
-      </div>
-
-      <!-- ═══ TRAVEL DISTANCE / ODOMETER PAGE ═══ -->
-      <div class="page" id="page-odometer">
-        <div class="page-header">
-          <div><div class="page-title">Travel <span>Distance</span></div><div class="page-sub">Locomotive odometer — total km run per loco</div></div>
-          <div class="page-actions"><button class="btn btn-ghost btn-sm" onclick="loadOdometer()">&#8634; Refresh</button></div>
-        </div>
-        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px;" id="odometerGrid">
-          <div style="grid-column:1/-1;text-align:center;color:var(--text3);padding:30px;">Loading...</div>
-        </div>
-        <!-- Update modal inline -->
-        <div id="odometerUpdateBox" style="display:none;background:var(--card);border:1px solid var(--border);border-radius:var(--radius2);padding:20px;margin-top:16px;max-width:420px;">
-          <div style="font-size:14px;font-weight:700;color:var(--navy);margin-bottom:12px;">Update Odometer Reading</div>
-          <input type="hidden" id="odo_locoId">
-          <div class="f-group"><label class="f-label" id="odo_locoLabel">Loco</label><input type="number" class="f-input" id="odo_km" placeholder="Total km run" min="0" step="1"></div>
-          <div style="display:flex;gap:8px;margin-top:12px;">
-            <button class="btn btn-primary" onclick="saveOdometer()">Save Reading</button>
-            <button class="btn btn-ghost" onclick="document.getElementById('odometerUpdateBox').style.display='none'">Cancel</button>
-          </div>
-        </div>
-      </div>
-
-      <!-- ═══ USP / ABOUT PAGE ═══ -->
-      <div class="page" id="page-usp">
-        <div class="page-header">
-          <div><div class="page-title">About <span>LOCO TM CMS</span></div><div class="page-sub">Why choose Himnish Limited's Condition Monitoring System</div></div>
-        </div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
-          <div class="card" style="grid-column:1/-1;background:linear-gradient(135deg,#1A365D,#2B6CB0);color:white;padding:28px;">
-            <div style="font-size:20px;font-weight:700;margin-bottom:8px;letter-spacing:0.5px;">LOCO TM Condition Monitoring System</div>
-            <div style="font-size:13px;opacity:0.85;line-height:1.8;">India's first AI-based predictive maintenance platform purpose-built for Indian Railways traction motors. Developed by Himnish Limited, Ghaziabad.</div>
-            <div style="margin-top:16px;display:flex;gap:12px;flex-wrap:wrap;">
-              <span style="background:rgba(255,255,255,0.15);padding:5px 14px;border-radius:20px;font-size:12px;font-weight:600;">WAP-7 / WAP-5 / WAG-9</span>
-              <span style="background:rgba(255,255,255,0.15);padding:5px 14px;border-radius:20px;font-size:12px;font-weight:600;">IO-Link Sensors</span>
-              <span style="background:rgba(255,255,255,0.15);padding:5px 14px;border-radius:20px;font-size:12px;font-weight:600;">Real-Time AI Analysis</span>
-              <span style="background:rgba(255,255,255,0.15);padding:5px 14px;border-radius:20px;font-size:12px;font-weight:600;">Railway-Grade Reliability</span>
-            </div>
-          </div>
-          ${[
-            ['🔬','Real-Time Vibration Analysis','6-axis accelerometer data (X/Y/Z + RMS/Peak/Crest) captured every 2 seconds via Balluff IO-Link sensors. Baseline noise filtering eliminates false alarms from idle/table vibration.'],
-            ['🌡️','Bearing Temperature Monitoring','Continuous temperature monitoring with configurable warning (70°C) and critical (85°C) thresholds. Visual arc gauges give instant status at-a-glance.'],
-            ['📊','Frequency Spectrum (FFT)','Time-domain vibration data converted to frequency spectrum using FFT, enabling identification of specific bearing defect frequencies (BPFO, BPFI, BSF, FTF).'],
-            ['🔮','L10 Bearing Life Prediction','ISO 281 L10 bearing life model adjusted for vibration amplitude, temperature, load factor (Kl) and speed factor (Ks). Health index 0–100 with condition badges.'],
-            ['🛤️','Travel Distance Tracking','Cumulative odometer tracking (km) per locomotive. Maintenance intervals can be tied to km run, not just time — enabling precision-based servicing.'],
-            ['⚡','Edge-to-Cloud Architecture','RUT200 industrial IoT router runs onboard Lua script → captures Balluff BNI data via MQTT → pushes to Railway cloud every 2s. Works on 4G/LTE rail network.'],
-            ['🚨','Smart Alarm Centre','Auto-generated alarms on threshold breach with acknowledgement workflow. Unacknowledged alarm counter in navigation badge. Historical alarm log with export.'],
-            ['📧','Automated Email Reports','Scheduled daily/weekly PDF status reports auto-emailed to depot supervisors. Manual on-demand report generation also available.'],
-            ['👥','Role-Based Access Control','Admin / Supervisor / Operator roles. Operators restricted to assigned locos. Supervisors see all. Full audit trail of config changes and alarm acknowledgements.'],
-            ['🏭','Fleet & Depot Management','Multi-loco, multi-depot fleet view. Depot-wise health summary cards. Photo upload per loco. Maintenance log with CSV export.'],
-          ].map(([icon,title,desc])=>`
-          <div class="card" style="display:flex;gap:14px;align-items:flex-start;">
-            <div style="font-size:28px;flex-shrink:0;line-height:1;">${icon}</div>
-            <div><div style="font-size:14px;font-weight:700;color:var(--navy);margin-bottom:6px;">${title}</div><div style="font-size:12px;color:var(--text2);line-height:1.7;">${desc}</div></div>
-          </div>`).join('')}
-          <div class="card" style="grid-column:1/-1;background:var(--bg3);border:1px solid var(--border2);">
-            <div class="card-title">Contact & Support</div>
-            <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;margin-top:8px;font-size:13px;color:var(--text2);">
-              <div>🏢 <strong>Himnish Limited</strong><br>F-408, Aditya Corporate Hub<br>Ghaziabad, UP — 201001</div>
-              <div>📞 <strong>+91-9873909306</strong><br>📧 piyush@himnishindia.com<br>🌐 www.himnishprojects.com</div>
-            </div>
-          </div>
         </div>
       </div>
 
@@ -836,8 +763,8 @@ function updateTmGrid() {
       <div class="tm-header"><div><div class="tm-num">TM-${i+1}</div><div class="tm-sub">Traction Motor</div></div>${badge}</div>
       <div class="tm-metrics">
         <div class="tm-m"><div class="tm-m-label">Temperature</div><div class="tm-m-val ${isCritT?'val-crit':isWarnT?'val-warn':'val-good'}">${temp!=null?temp.toFixed(1):'--'}<span style="font-size:11px;">°C</span></div></div>
-        <div class="tm-m"><div class="tm-m-label">VIB RMS <span style="font-size:9px;color:var(--text4);">(filtered)</span></div><div class="tm-m-val ${isCritV?'val-crit':isWarnV?'val-warn':'val-good'}">${filteredRms.toFixed(3)}</div><div style="font-size:9px;color:var(--text4);font-family:monospace;">raw: ${rawRms.toFixed(3)}</div></div>
-        <div class="tm-m"><div class="tm-m-label">Peak <span style="font-size:9px;color:var(--text4);">(filtered)</span></div><div class="tm-m-val val-normal">${filteredPeak.toFixed(3)}</div><div style="font-size:9px;color:var(--text4);font-family:monospace;">raw: ${(vib?.peak||0).toFixed(3)}</div></div>
+        <div class="tm-m"><div class="tm-m-label">VIB RMS</div><div class="tm-m-val ${isCritV?'val-crit':isWarnV?'val-warn':'val-good'}">${filteredRms.toFixed(3)}</div></div>
+        <div class="tm-m"><div class="tm-m-label">Peak</div><div class="tm-m-val val-normal">${filteredPeak.toFixed(3)}</div></div>
         <div class="tm-m"><div class="tm-m-label">Crest</div><div class="tm-m-val val-normal">${filteredRms>0?(filteredPeak/filteredRms).toFixed(2):'--'}</div></div>
       </div>
       <div class="vib-bars">
@@ -1056,11 +983,11 @@ async function loadPredictions() {
         <span class="cond-badge cond-${p.condition||'GOOD'}">${p.condition||'GOOD'}</span>
       </div>
       <div class="pred-metrics">
+        <div class="pred-m"><div class="pred-m-label">Remaining</div><div class="pred-m-val">${p.estimatedRemainingLife ? (p.estimatedRemainingLife > 99999 ? Math.round(p.estimatedRemainingLife/1000)+'K hrs' : p.estimatedRemainingLife.toLocaleString()) : '--'}</div><div class="pred-m-unit">hours</div></div>
         <div class="pred-m"><div class="pred-m-label">Health</div><div class="pred-m-val" style="color:${hColor}">${p.healthIndex||'--'}</div><div class="pred-m-unit">/ 100</div></div>
         <div class="pred-m"><div class="pred-m-label">Avg RMS</div><div class="pred-m-val">${p.avgVibRms||'--'}</div><div class="pred-m-unit">m/s²</div></div>
         <div class="pred-m"><div class="pred-m-label">Temp</div><div class="pred-m-val">${p.avgTemperature||'--'}</div><div class="pred-m-unit">°C</div></div>
         <div class="pred-m"><div class="pred-m-label">Peak</div><div class="pred-m-val">${p.maxVibPeak||'--'}</div><div class="pred-m-unit">m/s²</div></div>
-        <div class="pred-m"><div class="pred-m-label">Vib Factor</div><div class="pred-m-val">${p.adjustmentFactors?.vibration||'--'}</div><div class="pred-m-unit">Kv</div></div>
         <div class="pred-m"><div class="pred-m-label">Trend</div><div class="pred-m-val" style="color:${tColor}">${tDir} ${Math.abs(p.vibrationTrend||0).toFixed(1)}%</div></div>
       </div>
       <div style="height:6px;background:var(--border);border-radius:3px;overflow:hidden;margin:10px 0;"><div style="height:100%;width:${lifeBar}%;background:${hColor};border-radius:3px;"></div></div>
@@ -1223,10 +1150,6 @@ async function loadConfig() {
   document.getElementById('cfg_vibWarnPeak').value = config.vibThresholds.warning.peak;
   document.getElementById('cfg_vibCritPeak').value = config.vibThresholds.critical.peak;
   document.getElementById('cfg_bearingLife').value = config.bearingLifeBase;
-  const blLoad = document.getElementById('cfg_bearingLoad');
-  if(blLoad) blLoad.value = config.bearingLoadFactor ?? 1.0;
-  const blSpeed = document.getElementById('cfg_bearingSpeed');
-  if(blSpeed) blSpeed.value = config.bearingSpeedFactor ?? 1.0;
   const bl = config.vibBaseline ?? 0.15;
   const blEl = document.getElementById('cfg_baseline');
   if(blEl) blEl.value = bl;
@@ -1330,8 +1253,7 @@ function showPage(name) {
   const titles = {overview:'Overview',dashboard:'TM Dashboard',vibration:'Vibration Analysis',
     temperature:'Temperature',prediction:'Bearing Life',livedata:'Live Data Log',
     alarms:'Alarms',locos:'Manage Locos',users:'Manage Users',config:'Configuration',
-    reports:'Reports',fleet:'Fleet Overview',email:'Email Reports',maintenance:'Maintenance Log',
-    odometer:'Travel Distance',usp:'About / USP'};
+    reports:'Reports',fleet:'Fleet Overview',email:'Email Reports',maintenance:'Maintenance Log'};
   document.title = (titles[name]||name) + ' | LOCO TM CMS';
   document.querySelectorAll('.nav-item').forEach(n => {
     if (n.getAttribute('onclick')?.includes(`'${name}'`)) n.classList.add('active');
@@ -1362,7 +1284,6 @@ function showPage(name) {
   if (name === 'email') { loadEmailConfig(); populatePdfLoco(); }
   if (name === 'maintenance') loadMaintPage();
   if (name === 'reports') populateReportLoco();
-  if (name === 'odometer') loadOdometer();
   document.getElementById('sidebar').classList.remove('open');
 }
 
@@ -1667,9 +1588,7 @@ async function saveConfig() {
     logIntervalMinutes: parseInt(document.getElementById('cfg_logInterval').value),
     tempThresholds: { warning:parseFloat(document.getElementById('cfg_tempWarn').value), critical:parseFloat(document.getElementById('cfg_tempCrit').value) },
     vibThresholds: { warning:{rms:parseFloat(document.getElementById('cfg_vibWarnRms').value),peak:parseFloat(document.getElementById('cfg_vibWarnPeak').value)}, critical:{rms:parseFloat(document.getElementById('cfg_vibCritRms').value),peak:parseFloat(document.getElementById('cfg_vibCritPeak').value)} },
-    bearingLifeBase: parseInt(document.getElementById('cfg_bearingLife').value),
-    bearingLoadFactor: parseFloat(document.getElementById('cfg_bearingLoad').value) || 1.0,
-    bearingSpeedFactor: parseFloat(document.getElementById('cfg_bearingSpeed').value) || 1.0
+    bearingLifeBase: parseInt(document.getElementById('cfg_bearingLife').value)
   };
   const r = await api('/api/config',{method:'PUT',body:JSON.stringify(body)});
   if (r?.ok) { config=await r.json(); showToast('Configuration saved!','success'); }
@@ -2101,161 +2020,9 @@ setInterval(checkScheduledExport, 3600000); // Every hour check
 // Alarm sound check called from loadAlarms
 
 
-// ═══════════════════════════════════════════════════════════════
-// TRAVEL DISTANCE / ODOMETER
-// ═══════════════════════════════════════════════════════════════
-async function loadOdometer() {
-  const grid = document.getElementById('odometerGrid');
-  if (!grid) return;
-  if (!locos.length) { grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;color:var(--text3);padding:30px;">No locomotives configured.</div>'; return; }
-  const results = await Promise.all(locos.map(l => api(`/api/locos/${l.id}/odometer`)));
-  const odometers = await Promise.all(results.map(r => r ? r.json() : null));
-  grid.innerHTML = locos.map((loco, i) => {
-    const odo = odometers[i] || {};
-    const km = odo.travelDistance || 0;
-    const updated = odo.lastOdometerUpdate ? new Date(odo.lastOdometerUpdate).toLocaleString('en-IN') : 'Never';
-    return `<div class="card">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
-        <div>
-          <div style="font-size:15px;font-weight:700;color:var(--navy)">Loco ${loco.locoNumber}</div>
-          <div style="font-size:11px;color:var(--text3)">${loco.name||''} &mdash; ${loco.depot||'–'}</div>
-        </div>
-        <span class="tm-badge ${loco.status==='online'?'badge-good':''}"> ${loco.status==='online'?'Online':'Offline'}</span>
-      </div>
-      <div style="text-align:center;padding:16px 0;">
-        <div style="font-size:38px;font-weight:800;font-family:var(--mono);color:var(--navy)">${km.toLocaleString()}</div>
-        <div style="font-size:13px;color:var(--text3);margin-top:4px;">kilometres run</div>
-        <div style="font-size:10px;color:var(--text4);margin-top:6px;">Last updated: ${updated}</div>
-      </div>
-      <div style="height:4px;background:var(--border);border-radius:2px;overflow:hidden;margin-bottom:14px;">
-        <div style="height:100%;width:${Math.min(100,(km/500000)*100)}%;background:var(--blue2);border-radius:2px;"></div>
-      </div>
-      <button class="btn btn-primary btn-sm" style="width:100%" onclick="openOdometerEdit('${loco.id}','${loco.locoNumber}',${km})">&#128344; Update Reading</button>
-    </div>`;
-  }).join('');
-}
-
-function openOdometerEdit(locoId, locoNumber, currentKm) {
-  document.getElementById('odo_locoId').value = locoId;
-  document.getElementById('odo_locoLabel').textContent = `Loco ${locoNumber} — Enter new total km reading`;
-  document.getElementById('odo_km').value = currentKm;
-  document.getElementById('odometerUpdateBox').style.display = 'block';
-  document.getElementById('odo_km').focus();
-}
-
-async function saveOdometer() {
-  const locoId = document.getElementById('odo_locoId').value;
-  const km = parseFloat(document.getElementById('odo_km').value);
-  if (!locoId || isNaN(km) || km < 0) { showToast('Enter a valid distance', 'error'); return; }
-  const r = await api(`/api/locos/${locoId}/odometer`, { method:'PUT', body: JSON.stringify({ travelDistance: km }) });
-  if (r?.ok) {
-    document.getElementById('odometerUpdateBox').style.display = 'none';
-    showToast('Odometer updated!', 'success');
-    loadOdometer();
-  } else {
-    const d = await r?.json();
-    showToast(d?.error || 'Error saving odometer', 'error');
-  }
-}
-
-// ═══════════════════════════════════════════════════════════════
-// FREQUENCY SPECTRUM (FFT) — added to Vibration Analysis page
-// ═══════════════════════════════════════════════════════════════
-
-// Simple DFT for frequency spectrum (adequate for N ≤ 2048 samples)
-function computeFFT(signal, sampleRate) {
-  const N = signal.length;
-  const mag = [];
-  const half = Math.floor(N / 2);
-  for (let k = 0; k < half; k++) {
-    let re = 0, im = 0;
-    for (let n = 0; n < N; n++) {
-      const angle = (2 * Math.PI * k * n) / N;
-      re += signal[n] * Math.cos(angle);
-      im -= signal[n] * Math.sin(angle);
-    }
-    const amplitude = Math.sqrt(re * re + im * im) / N;
-    const freq = (k * sampleRate) / N;
-    mag.push({ freq: parseFloat(freq.toFixed(2)), amp: parseFloat((amplitude * 2).toFixed(6)) });
-  }
-  return mag;
-}
-
-async function loadFrequencySpectrum() {
-  if (!selectedLocoId) return;
-  const specPanel = document.getElementById('freqSpecPanel');
-  if (!specPanel) return;
-  specPanel.innerHTML = '<div style="text-align:center;color:var(--text3);padding:20px;font-size:13px;">Computing spectrum…</div>';
-
-  const hours = document.getElementById('vibTimeRange')?.value || 1;
-  const r = await api(`/api/data/${selectedLocoId}/${selectedTmKey}/history?hours=${Math.min(hours,1)}`);
-  if (!r) { specPanel.innerHTML = '<div style="color:var(--red);padding:10px;">Failed to load data</div>'; return; }
-  const history = await r.json();
-
-  if (!history || history.length < 16) {
-    specPanel.innerHTML = '<div style="text-align:center;color:var(--text3);padding:20px;font-size:13px;">Insufficient data for spectrum analysis. Need at least 16 readings.</div>';
-    return;
-  }
-
-  // Use last 512 or all available RMS samples. Sample rate ≈ 0.5 Hz (1 reading / 2s)
-  const maxN = Math.min(512, history.length);
-  const signal = history.slice(-maxN).map(d => d.vib?.rms || 0);
-  const SAMPLE_RATE = 0.5; // Hz (Lua pushes every 2s)
-  const spectrum = computeFFT(signal, SAMPLE_RATE);
-
-  // Find top 3 peaks
-  const sorted = [...spectrum].sort((a,b) => b.amp - a.amp).slice(0, 5).filter(s => s.freq > 0);
-
-  specPanel.innerHTML = `
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
-      <div class="card-title" style="margin:0">${selectedTmKey} — Frequency Spectrum (FFT)</div>
-      <span style="font-size:11px;color:var(--text3)">Sample rate: ${SAMPLE_RATE} Hz | N=${signal.length}</span>
-    </div>
-    <canvas id="freqChart" height="160"></canvas>
-    <div style="margin-top:10px;display:flex;gap:10px;flex-wrap:wrap;">
-      ${sorted.map((s,i) => `<div style="background:var(--bg3);border:1px solid var(--border);border-radius:6px;padding:8px 14px;font-size:12px;">
-        <span style="color:var(--text3)">Peak ${i+1}</span><br>
-        <span style="font-family:monospace;font-weight:700;color:var(--navy)">${s.freq} Hz</span>
-        <span style="color:var(--text3);font-size:10px;margin-left:4px;">${s.amp.toFixed(4)} m/s²</span>
-      </div>`).join('')}
-    </div>`;
-
-  setTimeout(() => {
-    const ctx = document.getElementById('freqChart')?.getContext('2d');
-    if (!ctx) return;
-    if (window._freqChart) { window._freqChart.destroy(); }
-    window._freqChart = new Chart(ctx, {
-      type: 'bar',
-      data: {
-        labels: spectrum.map(s => s.freq.toFixed(3)),
-        datasets: [{
-          label: 'Amplitude (m/s²)',
-          data: spectrum.map(s => s.amp),
-          backgroundColor: spectrum.map(s => {
-            const maxAmp = Math.max(...spectrum.map(x=>x.amp));
-            const ratio = s.amp / maxAmp;
-            return ratio > 0.7 ? '#FC8181' : ratio > 0.4 ? '#F6AD55' : '#3182CE88';
-          }),
-          borderWidth: 0,
-        }]
-      },
-      options: {
-        responsive: true, animation: false,
-        plugins: { legend: { display: false } },
-        scales: {
-          x: { ticks: { color:'#718096', maxTicksLimit:10, font:{family:'Inter',size:9} }, grid: { color:'#EDF2F7' },
-               title: { display:true, text:'Frequency (Hz)', color:'#718096', font:{size:10} } },
-          y: { ticks: { color:'#718096', font:{family:'Inter',size:9} }, grid: { color:'#EDF2F7' },
-               title: { display:true, text:'Amplitude (m/s²)', color:'#718096', font:{size:10} } }
-        }
-      }
-    });
-  }, 50);
-}
-
 document.addEventListener('keydown', function(e) {
   if(e.key === 'Escape') {
-    ['locoModal','userModal','confirmModal','maintModal'].forEach(function(id) {
+    ['locoModal','userModal','confirmModal'].forEach(function(id) {
       var el = document.getElementById(id);
       if(el) el.classList.remove('show');
     });

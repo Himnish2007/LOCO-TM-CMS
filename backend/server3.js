@@ -82,8 +82,6 @@ function loadDB() {
       tempThresholds: { warning: 70, critical: 85 },
       vibThresholds: { warning: { rms: 5.0, peak: 10.0 }, critical: { rms: 8.0, peak: 15.0 } },
       bearingLifeBase: 50000,
-      bearingLoadFactor: 1.0,
-      bearingSpeedFactor: 1.0,
       vibBaseline: 0.15
     }
   };
@@ -244,22 +242,6 @@ app.post('/api/data/ingest', (req, res) => {
   });
   const li = db.locos.findIndex(l => l.id === loco.id);
   if (li >= 0) { db.locos[li].status = 'online'; db.locos[li].lastSeen = ts; }
-
-  // Auto-DISCONNECTED: if a TM has not received data for 30s, mark it disconnected
-  const now30 = Date.now();
-  const readings = db.sensorReadings[loco.id];
-  if (readings) {
-    Object.keys(readings).forEach(tm => {
-      const latest = readings[tm]?.latest;
-      if (latest && latest.ioLinkStatus !== 'DISCONNECTED' && latest.timestamp) {
-        const age = now30 - new Date(latest.timestamp).getTime();
-        if (age > 30000) { // 30 seconds
-          readings[tm].latest = { ioLinkStatus: 'DISCONNECTED', timestamp: ts, temp: null, vib: null };
-        }
-      }
-    });
-  }
-
   saveDB();
   broadcast(loco.id, tmData, ts);
   res.json({ success: true, processed: Object.keys(tmData).length });
@@ -313,12 +295,9 @@ app.get('/api/bearing/:locoId/:tm/prediction', auth, (req, res) => {
   const avgTemp = temps.length ? temps.reduce((a, b) => a + b, 0) / temps.length : 25;
   const maxVib = Math.max(...vibs);
   const base = db.config.bearingLifeBase;
-  // L10 bearing life: adjusted for vibration, temperature, load and speed factors
   const vf = Math.pow(2.5 / Math.max(avgVib, 0.1), 3);
   const tf = avgTemp >= 70 ? 0.5 : avgTemp >= 50 ? 0.75 : 1.0;
-  const lf = db.config.bearingLoadFactor || 1.0;   // Load adjustment (>1 = lighter load = longer life)
-  const sf = db.config.bearingSpeedFactor || 1.0;  // Speed adjustment (>1 = lower speed = longer life)
-  const life = Math.round(base * vf * tf * lf * sf);
+  const life = Math.round(base * vf * tf);
   const h1 = vibs.slice(0, Math.floor(vibs.length / 2));
   const h2 = vibs.slice(Math.floor(vibs.length / 2));
   const trend = ((h2.reduce((a,b)=>a+b,0)/h2.length - h1.reduce((a,b)=>a+b,0)/h1.length) / (h1.reduce((a,b)=>a+b,0)/h1.length) * 100).toFixed(1);
@@ -334,8 +313,7 @@ app.get('/api/bearing/:locoId/:tm/prediction', auth, (req, res) => {
     avgVibRms: avgVib.toFixed(3), maxVibPeak: maxVib.toFixed(3),
     avgTemperature: avgTemp.toFixed(1), estimatedRemainingLife: life,
     healthIndex: health, condition: cond,
-    vibrationTrend: parseFloat(trend), recommendation: rec[cond],
-    adjustmentFactors: { load: lf.toFixed(2), speed: sf.toFixed(2), temp: tf.toFixed(2), vibration: vf.toFixed(4) }
+    vibrationTrend: parseFloat(trend), recommendation: rec[cond]
   });
 });
 
@@ -516,25 +494,6 @@ app.put('/api/locos/:id/depot', auth, (req, res) => {
   loco.depot = req.body.depot;
   saveDB();
   res.json(loco);
-});
-
-// ── Travel Distance (Odometer) ────────────────────────────────────
-app.get('/api/locos/:id/odometer', auth, (req, res) => {
-  const loco = db.locos.find(l => l.id === req.params.id);
-  if (!loco) return res.status(404).json({ error: 'Not found' });
-  res.json({ locoId: loco.id, locoNumber: loco.locoNumber, travelDistance: loco.travelDistance || 0, lastOdometerUpdate: loco.lastOdometerUpdate || null });
-});
-
-app.put('/api/locos/:id/odometer', auth, (req, res) => {
-  const loco = db.locos.find(l => l.id === req.params.id);
-  if (!loco) return res.status(404).json({ error: 'Not found' });
-  const newDistance = parseFloat(req.body.travelDistance);
-  if (isNaN(newDistance) || newDistance < 0) return res.status(400).json({ error: 'Invalid distance value' });
-  loco.travelDistance = newDistance;
-  loco.lastOdometerUpdate = new Date().toISOString();
-  loco.lastOdometerUpdatedBy = req.user.username;
-  saveDB();
-  res.json({ locoId: loco.id, locoNumber: loco.locoNumber, travelDistance: loco.travelDistance, lastOdometerUpdate: loco.lastOdometerUpdate });
 });
 
 // ════════════════════════════════════════════════════════════════
