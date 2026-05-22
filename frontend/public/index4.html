@@ -375,7 +375,6 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--f
       <div class="nav-item" onclick="showPage('maintenance')"><span class="nav-icon">&#128295;</span> Maintenance Log</div>
       <div class="nav-item" onclick="showPage('odometer')"><span class="nav-icon">&#128344;</span> Travel Distance</div>
       <div class="nav-item admin-only" onclick="showPage('email')"><span class="nav-icon">&#128231;</span> Email Reports</div>
-      <div class="nav-item" onclick="showPage('usp')"><span class="nav-icon">&#11088;</span> Why Himnish</div>
       <div class="nav-item" onclick="showPage('usp')"><span class="nav-icon">&#11088;</span> About / USP</div>
     </div>
     <div class="content" id="mainContent">
@@ -490,20 +489,9 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--f
       <div class="page" id="page-config">
         <div class="page-header"><div class="page-title">System <span>Configuration</span></div><button class="btn btn-primary" onclick="saveConfig()">Save</button></div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
-          <div class="card" style="grid-column:1/-1;">
-            <div class="card-title">Quick Thresholds by Loco Type</div>
-            <div style="font-size:13px;color:var(--text2);margin-bottom:12px;">Select loco series to auto-fill recommended thresholds — then click Save.</div>
-            <div style="display:flex;gap:8px;flex-wrap:wrap;">
-              <button class="btn btn-ghost btn-sm" onclick="applyLocoThresholdsToConfig('WAP-7')">WAP-7 (Rajdhani)</button>
-              <button class="btn btn-ghost btn-sm" onclick="applyLocoThresholdsToConfig('WAP-5')">WAP-5 (High Speed)</button>
-              <button class="btn btn-ghost btn-sm" onclick="applyLocoThresholdsToConfig('WAG-9')">WAG-9 (Freight)</button>
-              <button class="btn btn-ghost btn-sm" onclick="applyLocoThresholdsToConfig('WAG-12')">WAG-12 (Heavy Freight)</button>
-              <button class="btn btn-ghost btn-sm" onclick="applyLocoThresholdsToConfig('WAM-4')">WAM-4 (Mixed)</button>
-            </div>
-          </div>
-          <div class="card"><div class="card-title">Data Logging</div><div class="f-group"><label class="f-label">Log Interval (min)</label><input type="number" class="f-input" id="cfg_logInterval" value="10" min="1" max="60"></div></div>
-          <div class="card"><div class="card-title">Temperature Thresholds</div><div class="form-row"><div class="f-group"><label class="f-label">Warning (&#8451;)</label><input type="number" class="f-input" id="cfg_tempWarn" value="80"></div><div class="f-group"><label class="f-label">Critical (&#8451;)</label><input type="number" class="f-input" id="cfg_tempCrit" value="120"></div></div></div>
-          <div class="card"><div class="card-title">Vibration Thresholds (RMS m/s&#178;)</div><div class="form-row"><div class="f-group"><label class="f-label">Warning RMS</label><input type="number" step="0.1" class="f-input" id="cfg_vibWarnRms" value="8.0"></div><div class="f-group"><label class="f-label">Critical RMS</label><input type="number" step="0.1" class="f-input" id="cfg_vibCritRms" value="10.0"></div></div><div class="form-row"><div class="f-group"><label class="f-label">Warning Peak</label><input type="number" step="0.1" class="f-input" id="cfg_vibWarnPeak" value="12.0"></div><div class="f-group"><label class="f-label">Critical Peak</label><input type="number" step="0.1" class="f-input" id="cfg_vibCritPeak" value="16.0"></div></div></div>
+          <div class="card"><div class="card-title">Data Logging</div><div class="f-group"><label class="f-label">Log Interval (min)</label><input type="number" class="f-input" id="cfg_logInterval" value="1" min="1" max="60"></div></div>
+          <div class="card"><div class="card-title">Temperature Thresholds</div><div class="form-row"><div class="f-group"><label class="f-label">Warning (&#8451;)</label><input type="number" class="f-input" id="cfg_tempWarn" value="70"></div><div class="f-group"><label class="f-label">Critical (&#8451;)</label><input type="number" class="f-input" id="cfg_tempCrit" value="85"></div></div></div>
+          <div class="card"><div class="card-title">Vibration Thresholds (RMS m/s&#178;)</div><div class="form-row"><div class="f-group"><label class="f-label">Warning RMS</label><input type="number" step="0.1" class="f-input" id="cfg_vibWarnRms" value="5.0"></div><div class="f-group"><label class="f-label">Critical RMS</label><input type="number" step="0.1" class="f-input" id="cfg_vibCritRms" value="8.0"></div></div><div class="form-row"><div class="f-group"><label class="f-label">Warning Peak</label><input type="number" step="0.1" class="f-input" id="cfg_vibWarnPeak" value="10.0"></div><div class="f-group"><label class="f-label">Critical Peak</label><input type="number" step="0.1" class="f-input" id="cfg_vibCritPeak" value="15.0"></div></div></div>
           <div class="card"><div class="card-title">Bearing Life Model</div><div class="f-group"><label class="f-label">Base Life (hours)</label><input type="number" class="f-input" id="cfg_bearingLife" value="50000"></div><div class="f-group"><label class="f-label">Load Adjustment Factor (Kl)</label><input type="number" step="0.01" class="f-input" id="cfg_bearingLoad" value="1.0" min="0.1" max="3.0"><div style="font-size:11px;color:var(--text3);margin-top:3px;">1.0 = nominal. &lt;1 = heavy load (shorter life). Use 0.5–2.0 range.</div></div><div class="f-group"><label class="f-label">Speed Adjustment Factor (Ks)</label><input type="number" step="0.01" class="f-input" id="cfg_bearingSpeed" value="1.0" min="0.1" max="3.0"><div style="font-size:11px;color:var(--text3);margin-top:3px;">1.0 = nominal. &lt;1 = high speed (shorter life). Use 0.5–2.0 range.</div></div></div>
           <div class="card"><div class="card-title">Vibration Baseline Filter</div>
             <div class="f-group"><label class="f-label">Baseline / Noise Filter (m/s²)</label><input type="number" step="0.01" class="f-input" id="cfg_baseline" value="0.15" min="0" max="2"></div>
@@ -528,176 +516,6 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--f
               <thead><tr><th>Date</th><th>TM</th><th>Type</th><th>Description</th><th>Done By</th><th>Next Due</th><th>Status</th><th>Del</th></tr></thead>
               <tbody id="maintTableBody"><tr><td colspan="7" style="text-align:center;color:var(--text3);padding:30px;">No maintenance records. Add first entry.</td></tr></tbody>
             </table>
-          </div>
-        </div>
-      </div>
-
-      <div class="page" id="page-usp">
-        <div class="page-header">
-          <div><div class="page-title">Why <span>Himnish CMS?</span></div><div class="page-sub">What makes our system the best choice for Indian Railways traction motor monitoring</div></div>
-        </div>
-        <!-- Hero Banner -->
-        <div style="background:linear-gradient(135deg,var(--navy) 0%,#2B6CB0 100%);border-radius:12px;padding:32px;margin-bottom:20px;color:white;text-align:center;">
-          <div style="font-size:13px;letter-spacing:3px;color:#90CDF4;font-weight:600;margin-bottom:8px;">HIMNISH LIMITED — PROUDLY MADE IN INDIA</div>
-          <div style="font-size:28px;font-weight:800;margin-bottom:10px;">LOCO TM Condition Monitoring System</div>
-          <div style="font-size:15px;opacity:0.85;max-width:600px;margin:0 auto 20px;">"India's first AI-powered real-time traction motor health monitoring platform — built exclusively for Indian Railways"</div>
-          <div style="display:flex;justify-content:center;gap:20px;flex-wrap:wrap;">
-            <div style="background:rgba(255,255,255,0.15);padding:10px 20px;border-radius:8px;text-align:center;"><div style="font-size:22px;font-weight:800;">2s</div><div style="font-size:11px;opacity:0.8;">Data Refresh</div></div>
-            <div style="background:rgba(255,255,255,0.15);padding:10px 20px;border-radius:8px;text-align:center;"><div style="font-size:22px;font-weight:800;">6 TMs</div><div style="font-size:11px;opacity:0.8;">Per Locomotive</div></div>
-            <div style="background:rgba(255,255,255,0.15);padding:10px 20px;border-radius:8px;text-align:center;"><div style="font-size:22px;font-weight:800;">24×7</div><div style="font-size:11px;opacity:0.8;">Live Monitoring</div></div>
-            <div style="background:rgba(255,255,255,0.15);padding:10px 20px;border-radius:8px;text-align:center;"><div style="font-size:22px;font-weight:800;">70%</div><div style="font-size:11px;opacity:0.8;">Less Downtime</div></div>
-          </div>
-        </div>
-
-        <!-- USP Cards Grid -->
-        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px;margin-bottom:20px;">
-
-          <div class="card" style="border-left:5px solid #1A365D;">
-            <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;">
-              <div style="width:44px;height:44px;background:#EBF8FF;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:22px;">&#128642;</div>
-              <div style="font-size:15px;font-weight:700;color:var(--navy);">Railway-First Design</div>
-            </div>
-            <div style="font-size:13px;color:var(--text2);line-height:1.7;">Engineered specifically for Indian Railways WAP-7, WAP-5, WAG-9 traction motors — not adapted from generic industrial software. Every threshold, every parameter is tuned for railway operating conditions.</div>
-          </div>
-
-          <div class="card" style="border-left:5px solid #0BC5EA;">
-            <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;">
-              <div style="width:44px;height:44px;background:#E0FCFF;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:22px;">&#129302;</div>
-              <div style="font-size:15px;font-weight:700;color:var(--navy);">AI Predictive Analytics</div>
-            </div>
-            <div style="font-size:13px;color:var(--text2);line-height:1.7;">ISO 281 L10 bearing life model combined with real-time vibration RMS, crest factor, and temperature data. Detects bearing degradation 30–60 days before failure — giving maintenance teams time to plan.</div>
-          </div>
-
-          <div class="card" style="border-left:5px solid #38A169;">
-            <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;">
-              <div style="width:44px;height:44px;background:#F0FFF4;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:22px;">&#128225;</div>
-              <div style="font-size:15px;font-weight:700;color:var(--navy);">Real-Time 24×7 Monitoring</div>
-            </div>
-            <div style="font-size:13px;color:var(--text2);line-height:1.7;">Sensor data pushed every 2 seconds via IO-Link → MQTT → Cloud pipeline. Multi-level alarm system (Normal → Warning → Critical) with instant dashboard alerts, email reports, and sound notifications.</div>
-          </div>
-
-          <div class="card" style="border-left:5px solid #D69E2E;">
-            <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;">
-              <div style="width:44px;height:44px;background:#FFFFF0;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:22px;">&#127774;</div>
-              <div style="font-size:15px;font-weight:700;color:var(--navy);">FFT Frequency Spectrum</div>
-            </div>
-            <div style="font-size:13px;color:var(--text2);line-height:1.7;">Built-in Fast Fourier Transform analysis identifies specific fault frequencies — bearing defects, rotor imbalance, misalignment, and resonance — that simple RMS monitoring cannot detect.</div>
-          </div>
-
-          <div class="card" style="border-left:5px solid #6B46C1;">
-            <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;">
-              <div style="width:44px;height:44px;background:#FAF5FF;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:22px;">&#127760;</div>
-              <div style="font-size:15px;font-weight:700;color:var(--navy);">Cloud + Edge Architecture</div>
-            </div>
-            <div style="font-size:13px;color:var(--text2);line-height:1.7;">RUT200 4G industrial gateway as edge node — works on moving trains. Data securely transmitted to Railway.app cloud via HTTPS. Accessible from any device, anywhere, on any network.</div>
-          </div>
-
-          <div class="card" style="border-left:5px solid #E53E3E;">
-            <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;">
-              <div style="width:44px;height:44px;background:#FFF5F5;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:22px;">&#128202;</div>
-              <div style="font-size:15px;font-weight:700;color:var(--navy);">Multi-Parameter Analysis</div>
-            </div>
-            <div style="font-size:13px;color:var(--text2);line-height:1.7;">Simultaneously monitors 8 parameters per TM: X/Y/Z vibration axes, RMS, Peak, Crest Factor, Temperature, and Bearing Health Index — giving a 360° view of motor condition.</div>
-          </div>
-
-          <div class="card" style="border-left:5px solid #DD6B20;">
-            <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;">
-              <div style="width:44px;height:44px;background:#FFFAF0;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:22px;">&#128101;</div>
-              <div style="font-size:15px;font-weight:700;color:var(--navy);">Role-Based Access Control</div>
-            </div>
-            <div style="font-size:13px;color:var(--text2);line-height:1.7;">Three-tier user management — Admin, Supervisor, Operator. Each operator sees only their assigned locomotives. Automated per-user email reports deliver relevant data to the right person.</div>
-          </div>
-
-          <div class="card" style="border-left:5px solid #2B6CB0;">
-            <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;">
-              <div style="width:44px;height:44px;background:#EBF8FF;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:22px;">&#128196;</div>
-              <div style="font-size:15px;font-weight:700;color:var(--navy);">Automated Reporting</div>
-            </div>
-            <div style="font-size:13px;color:var(--text2);line-height:1.7;">Scheduled daily email reports, auto CSV data export, PDF status reports, maintenance log with CSV export. Complete audit trail of every alarm, acknowledgement, and maintenance activity.</div>
-          </div>
-
-          <div class="card" style="border-left:5px solid #276749;">
-            <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;">
-              <div style="width:44px;height:44px;background:#F0FFF4;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:22px;">&#128200;</div>
-              <div style="font-size:15px;font-weight:700;color:var(--navy);">Proven ROI</div>
-            </div>
-            <div style="font-size:13px;color:var(--text2);line-height:1.7;">Downtime reduced by 70%. Maintenance cost reduced by 40%. Motor failure rate from 12/year to 2/year. Reactive repair costs 3–5× more than planned maintenance — this system pays for itself.</div>
-          </div>
-
-          <div class="card" style="border-left:5px solid #9B2C2C;">
-            <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;">
-              <div style="width:44px;height:44px;background:#FFF5F5;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:22px;">&#127981;</div>
-              <div style="font-size:15px;font-weight:700;color:var(--navy);">OEM End-to-End</div>
-            </div>
-            <div style="font-size:13px;color:var(--text2);line-height:1.7;">Himnish Limited designs, manufactures, deploys, and supports the complete system — hardware, firmware, cloud backend, and dashboard. Single-vendor accountability with dedicated technical support.</div>
-          </div>
-
-          <div class="card" style="border-left:5px solid #744210;">
-            <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;">
-              <div style="width:44px;height:44px;background:#FFFBEB;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:22px;">&#128295;</div>
-              <div style="font-size:15px;font-weight:700;color:var(--navy);">Predictive Maintenance Log</div>
-            </div>
-            <div style="font-size:13px;color:var(--text2);line-height:1.7;">Server-side maintenance history for every TM — tracks inspection dates, work done, technician name, and next due date. Overdue maintenance highlighted automatically with alerts.</div>
-          </div>
-
-          <div class="card" style="border-left:5px solid #285E61;">
-            <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;">
-              <div style="width:44px;height:44px;background:#E6FFFA;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:22px;">&#127987;</div>
-              <div style="font-size:15px;font-weight:700;color:var(--navy);">Made in India — Atmanirbhar</div>
-            </div>
-            <div style="font-size:13px;color:var(--text2);line-height:1.7;">100% indigenous development. No dependence on foreign software licenses or proprietary hardware. Fully aligned with Indian Railways' Digital India and Atmanirbhar Bharat missions.</div>
-          </div>
-
-        </div>
-
-        <!-- Technology Stack -->
-        <div class="card" style="margin-bottom:16px;">
-          <div class="card-title">Technology Stack</div>
-          <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;">
-            <div style="background:var(--bg3);border-radius:8px;padding:12px;text-align:center;border:1px solid var(--border);">
-              <div style="font-size:11px;font-weight:700;color:var(--text3);letter-spacing:1px;margin-bottom:4px;">SENSOR</div>
-              <div style="font-size:13px;font-weight:600;color:var(--navy);">BCM0003 IO-Link</div>
-              <div style="font-size:11px;color:var(--text3);">Balluff Triaxial + Temp</div>
-            </div>
-            <div style="background:var(--bg3);border-radius:8px;padding:12px;text-align:center;border:1px solid var(--border);">
-              <div style="font-size:11px;font-weight:700;color:var(--text3);letter-spacing:1px;margin-bottom:4px;">IO-LINK MASTER</div>
-              <div style="font-size:13px;font-weight:600;color:var(--navy);">BNI00L1 (8-Port)</div>
-              <div style="font-size:11px;color:var(--text3);">Balluff IO-Link Master</div>
-            </div>
-            <div style="background:var(--bg3);border-radius:8px;padding:12px;text-align:center;border:1px solid var(--border);">
-              <div style="font-size:11px;font-weight:700;color:var(--text3);letter-spacing:1px;margin-bottom:4px;">EDGE GATEWAY</div>
-              <div style="font-size:13px;font-weight:600;color:var(--navy);">RUT200</div>
-              <div style="font-size:11px;color:var(--text3);">Teltonika 4G Router</div>
-            </div>
-            <div style="background:var(--bg3);border-radius:8px;padding:12px;text-align:center;border:1px solid var(--border);">
-              <div style="font-size:11px;font-weight:700;color:var(--text3);letter-spacing:1px;margin-bottom:4px;">PROTOCOL</div>
-              <div style="font-size:13px;font-weight:600;color:var(--navy);">IO-Link + MQTT</div>
-              <div style="font-size:11px;color:var(--text3);">Secure HTTPS Push</div>
-            </div>
-            <div style="background:var(--bg3);border-radius:8px;padding:12px;text-align:center;border:1px solid var(--border);">
-              <div style="font-size:11px;font-weight:700;color:var(--text3);letter-spacing:1px;margin-bottom:4px;">BACKEND</div>
-              <div style="font-size:13px;font-weight:600;color:var(--navy);">Node.js + WebSocket</div>
-              <div style="font-size:11px;color:var(--text3);">Railway.app Cloud</div>
-            </div>
-            <div style="background:var(--bg3);border-radius:8px;padding:12px;text-align:center;border:1px solid var(--border);">
-              <div style="font-size:11px;font-weight:700;color:var(--text3);letter-spacing:1px;margin-bottom:4px;">DASHBOARD</div>
-              <div style="font-size:13px;font-weight:600;color:var(--navy);">HTML5 + Chart.js</div>
-              <div style="font-size:11px;color:var(--text3);">Responsive Web App</div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Contact Footer -->
-        <div class="card" style="background:var(--navy);color:white;text-align:center;padding:28px;">
-          <div style="font-size:20px;font-weight:800;letter-spacing:2px;margin-bottom:4px;">HIMNISH LIMITED</div>
-          <div style="font-size:13px;opacity:0.75;margin-bottom:16px;">Industrial Automation &amp; AI-Based Railway Solutions</div>
-          <div style="display:flex;justify-content:center;gap:24px;flex-wrap:wrap;font-size:13px;">
-            <span>&#128205; F-408, Aditya Corporate Hub, RDC, Rajnagar, Ghaziabad, UP-201001</span>
-          </div>
-          <div style="display:flex;justify-content:center;gap:24px;flex-wrap:wrap;font-size:13px;margin-top:8px;">
-            <span>&#128222; +91-9873909306 / +91-120-4156671</span>
-            <span>&#9993; piyush@himnishindia.com</span>
-            <span>&#127760; www.himnishprojects.com</span>
           </div>
         </div>
       </div>
@@ -844,14 +662,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--f
       <input type="hidden" id="loco_id">
       <div class="form-row"><div class="f-group"><label class="f-label">Loco Number *</label><input class="f-input" id="loco_number" placeholder="e.g. 22001"></div><div class="f-group"><label class="f-label">Name</label><input class="f-input" id="loco_name" placeholder="WAP-7 Rajdhani Link"></div></div>
       <div class="form-row"><div class="f-group"><label class="f-label">IP Address *</label><input class="f-input" id="loco_ip" placeholder="192.168.x.x"></div><div class="f-group"><label class="f-label">Depot</label><input class="f-input" id="loco_depot" placeholder="LKO Depot"></div></div>
-      <div class="form-row"><div class="f-group"><label class="f-label">Series</label><select class="f-select" id="loco_series" onchange="applyLocoThresholds(this.value)">
-  <option value="WAP-7">WAP-7 (Rajdhani/Express)</option>
-  <option value="WAP-5">WAP-5 (High Speed)</option>
-  <option value="WAG-9">WAG-9 (Freight)</option>
-  <option value="WAG-12">WAG-12 (Heavy Freight)</option>
-  <option value="WAM-4">WAM-4 (Mixed)</option>
-  <option value="Other">Other</option>
-</select></div><div class="f-group"><label class="f-label">TM Count</label><select class="f-select" id="loco_tmCount"><option value="6" selected>6 (Standard)</option><option value="4">4</option><option value="3">3</option></select></div></div>
+      <div class="form-row"><div class="f-group"><label class="f-label">Series</label><select class="f-select" id="loco_series"><option>WAP-7</option><option>WAP-5</option><option>WAG-9</option><option>WAG-12</option><option>WAM-4</option><option>Other</option></select></div><div class="f-group"><label class="f-label">TM Count</label><select class="f-select" id="loco_tmCount"><option value="6" selected>6 (Standard)</option><option value="4">4</option><option value="3">3</option></select></div></div>
       <div class="f-group"><label class="f-label">Loco Photo (optional)</label>
         <div style="display:flex;align-items:center;gap:10px;">
           <img id="loco_photo_preview" src="" style="width:60px;height:60px;border-radius:8px;object-fit:cover;border:2px solid var(--border);display:none;">
@@ -1131,7 +942,7 @@ function refreshOverview() {
         <span style="font-size:12px;font-weight:700;color:${hColor}">Health: ${health}% (${hLabel})</span>
       </div>` : ''}
       <div class="ov-tm-grid">${tms||'<div style="color:var(--text3);font-size:12px;grid-column:1/-1;text-align:center;padding:10px;">No data yet</div>'}</div>
-      <div style="font-size:11px;color:var(--text4);margin-top:10px;font-family:monospace;display:flex;justify-content:space-between;"><span>${l.ipAddress} · Last: ${l.lastSeen?new Date(l.lastSeen).toLocaleTimeString():'never'}</span></div>
+      <div style="font-size:11px;color:var(--text4);margin-top:10px;font-family:monospace">${l.ipAddress} · Last: ${l.lastSeen?new Date(l.lastSeen).toLocaleTimeString():'never'}</div>
     </div>`;
   }).join('')||'<div style="color:var(--text3);text-align:center;padding:40px;grid-column:1/-1;"><div style="font-size:32px;margin-bottom:12px;">🚂</div><div style="font-size:15px;font-weight:600;color:var(--text2);margin-bottom:6px;">No Locomotives Added</div><div style="font-size:13px;">Go to <strong>Manage Locos</strong> in the sidebar to add your first locomotive.</div></div>';
 }
@@ -1236,7 +1047,7 @@ async function loadPredictions() {
   }
   grid.innerHTML=preds.map((p,i)=>{
     if(!p||p.message)return`<div class="pred-card"><div style="font-size:14px;font-weight:700;color:var(--navy);margin-bottom:8px;">TM-${i+1}</div><div style="color:var(--text3);font-size:13px;">Insufficient data</div></div>`;
-
+    const lifeBar=Math.min(100,Math.round((p.estimatedRemainingLife/((config.bearingLifeBase)||50000))*100));
     const hColor=p.healthIndex>70?'#48BB78':p.healthIndex>40?'#F6AD55':'#FC8181';
     const tDir=p.vibrationTrend>0?'↑':'↓',tColor=p.vibrationTrend>5?'#E53E3E':p.vibrationTrend>0?'#D69E2E':'#38A169';
     return`<div class="pred-card">
@@ -1249,10 +1060,10 @@ async function loadPredictions() {
         <div class="pred-m"><div class="pred-m-label">Avg RMS</div><div class="pred-m-val">${p.avgVibRms||'--'}</div><div class="pred-m-unit">m/s²</div></div>
         <div class="pred-m"><div class="pred-m-label">Temp</div><div class="pred-m-val">${p.avgTemperature||'--'}</div><div class="pred-m-unit">°C</div></div>
         <div class="pred-m"><div class="pred-m-label">Peak</div><div class="pred-m-val">${p.maxVibPeak||'--'}</div><div class="pred-m-unit">m/s²</div></div>
-
+        <div class="pred-m"><div class="pred-m-label">Vib Factor</div><div class="pred-m-val">${p.adjustmentFactors?.vibration||'--'}</div><div class="pred-m-unit">Kv</div></div>
         <div class="pred-m"><div class="pred-m-label">Trend</div><div class="pred-m-val" style="color:${tColor}">${tDir} ${Math.abs(p.vibrationTrend||0).toFixed(1)}%</div></div>
       </div>
-      <div style="height:6px;background:var(--border);border-radius:3px;overflow:hidden;margin:10px 0;"><div style="height:100%;width:${p.healthIndex||0}%;background:${hColor};border-radius:3px;transition:width 0.5s;"></div></div>
+      <div style="height:6px;background:var(--border);border-radius:3px;overflow:hidden;margin:10px 0;"><div style="height:100%;width:${lifeBar}%;background:${hColor};border-radius:3px;"></div></div>
       <div class="rec-box rec-${p.condition||'GOOD'}">&#128204; ${p.recommendation||'Normal operation'}</div>
     </div>`;
   }).join('');
@@ -2441,73 +2252,6 @@ async function loadFrequencySpectrum() {
     });
   }, 50);
 }
-
-
-// ════════════════════════════════════════════════════════════════
-// LOCO TYPE AUTO-THRESHOLDS
-// ════════════════════════════════════════════════════════════════
-const LOCO_THRESHOLDS = {
-  'WAP-7': {
-    desc: 'Rajdhani/Express — 160 km/h, 6 TMs, 1350kW each',
-    tempWarn: 65, tempCrit: 80,
-    vibWarnRms: 4.5, vibCritRms: 7.0,
-    vibWarnPeak: 9.0, vibCritPeak: 13.0,
-    bearingBase: 30000, loadFactor: 1.0, speedFactor: 0.9
-  },
-  'WAP-5': {
-    desc: 'High Speed — 200 km/h, 4 TMs, 1500kW each',
-    tempWarn: 60, tempCrit: 75,
-    vibWarnRms: 4.0, vibCritRms: 6.5,
-    vibWarnPeak: 8.0, vibCritPeak: 12.0,
-    bearingBase: 25000, loadFactor: 0.9, speedFactor: 0.85
-  },
-  'WAG-9': {
-    desc: 'Freight — 100 km/h, 6 TMs, 1150kW each',
-    tempWarn: 70, tempCrit: 85,
-    vibWarnRms: 5.5, vibCritRms: 8.5,
-    vibWarnPeak: 11.0, vibCritPeak: 16.0,
-    bearingBase: 40000, loadFactor: 1.2, speedFactor: 1.1
-  },
-  'WAG-12': {
-    desc: 'Heavy Freight — 120 km/h, 6 TMs, 1200kW each',
-    tempWarn: 70, tempCrit: 85,
-    vibWarnRms: 5.0, vibCritRms: 8.0,
-    vibWarnPeak: 10.0, vibCritPeak: 15.0,
-    bearingBase: 35000, loadFactor: 1.3, speedFactor: 1.0
-  },
-  'WAM-4': {
-    desc: 'Mixed Service — 120 km/h, 6 TMs',
-    tempWarn: 68, tempCrit: 82,
-    vibWarnRms: 5.0, vibCritRms: 7.5,
-    vibWarnPeak: 10.0, vibCritPeak: 14.0,
-    bearingBase: 35000, loadFactor: 1.0, speedFactor: 1.0
-  }
-};
-
-function applyLocoThresholds(series) {
-  const t = LOCO_THRESHOLDS[series];
-  if (!t) return;
-  // Show info toast
-  showToast('Thresholds set for ' + series + ' — ' + t.desc, 'success');
-}
-
-function applyLocoThresholdsToConfig(series) {
-  const t = LOCO_THRESHOLDS[series];
-  if (!t) return;
-  // Apply to config page inputs
-  const set = (id, val) => { const el = document.getElementById(id); if(el) el.value = val; };
-  set('cfg_tempWarn', t.tempWarn);
-  set('cfg_tempCrit', t.tempCrit);
-  set('cfg_vibWarnRms', t.vibWarnRms);
-  set('cfg_vibCritRms', t.vibCritRms);
-  set('cfg_vibWarnPeak', t.vibWarnPeak);
-  set('cfg_vibCritPeak', t.vibCritPeak);
-  set('cfg_bearingLife', t.bearingBase);
-  set('cfg_bearingLoad', t.loadFactor);
-  set('cfg_bearingSpeed', t.speedFactor);
-  showToast('✅ ' + series + ' thresholds applied! Click Save to confirm.', 'success');
-}
-
 
 document.addEventListener('keydown', function(e) {
   if(e.key === 'Escape') {
