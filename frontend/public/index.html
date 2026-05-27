@@ -489,17 +489,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--f
       <div class="page" id="page-config">
         <div class="page-header"><div class="page-title">System <span>Configuration</span></div><button class="btn btn-primary" onclick="saveConfig()">Save</button></div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
-          <div class="card" style="grid-column:1/-1;">
-            <div class="card-title">Quick Thresholds by Loco Type</div>
-            <div style="font-size:13px;color:var(--text2);margin-bottom:12px;">Select loco series to auto-fill recommended thresholds — then click Save.</div>
-            <div style="display:flex;gap:8px;flex-wrap:wrap;">
-              <button class="btn btn-ghost btn-sm" onclick="applyLocoThresholdsToConfig('WAP-7')">WAP-7 (Rajdhani)</button>
-              <button class="btn btn-ghost btn-sm" onclick="applyLocoThresholdsToConfig('WAP-5')">WAP-5 (High Speed)</button>
-              <button class="btn btn-ghost btn-sm" onclick="applyLocoThresholdsToConfig('WAG-9')">WAG-9 (Freight)</button>
-              <button class="btn btn-ghost btn-sm" onclick="applyLocoThresholdsToConfig('WAG-12')">WAG-12 (Heavy Freight)</button>
-              <button class="btn btn-ghost btn-sm" onclick="applyLocoThresholdsToConfig('WAM-4')">WAM-4 (Mixed)</button>
-            </div>
-          </div>
+
           <div class="card"><div class="card-title">Data Logging</div><div class="f-group"><label class="f-label">Log Interval (min)</label><input type="number" class="f-input" id="cfg_logInterval" value="10" min="1" max="60"></div></div>
           <div class="card"><div class="card-title">Temperature Thresholds</div><div class="form-row"><div class="f-group"><label class="f-label">Warning (&#8451;)</label><input type="number" class="f-input" id="cfg_tempWarn" value="80"></div><div class="f-group"><label class="f-label">Critical (&#8451;)</label><input type="number" class="f-input" id="cfg_tempCrit" value="120"></div></div></div>
           <div class="card"><div class="card-title">Vibration Thresholds (RMS m/s&#178;)</div><div class="form-row"><div class="f-group"><label class="f-label">Warning RMS</label><input type="number" step="0.1" class="f-input" id="cfg_vibWarnRms" value="8.0"></div><div class="f-group"><label class="f-label">Critical RMS</label><input type="number" step="0.1" class="f-input" id="cfg_vibCritRms" value="10.0"></div></div><div class="form-row"><div class="f-group"><label class="f-label">Warning Peak</label><input type="number" step="0.1" class="f-input" id="cfg_vibWarnPeak" value="12.0"></div><div class="f-group"><label class="f-label">Critical Peak</label><input type="number" step="0.1" class="f-input" id="cfg_vibCritPeak" value="16.0"></div></div></div>
